@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Underdog Slugging Association</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="pageOverlay">
+
+    <!-- HUD -->
+    <header class="hud">
+      <div class="hudLeft">
+        <img class="hudLogo" src="assets/logos/league/usa-logo.png" alt="League Logo">
+        <div class="hudTitleBlock">
+          <div class="hudTitle">Underdog Slugging Association</div>
+          <div class="hudSub">Season: <span id="hudSeason">Season 1</span></div>
+        </div>
+      </div>
+
+      <div class="hudRight">
+        <div class="hudStat">
+          <div class="hudLabel">User</div>
+          <div class="hudValue" id="hudUsername">Guest</div>
+        </div>
+
+        <div class="hudStat hudCoins">
+          <img class="coinIcon" src="assets/icons/waffle-coin.png" alt="Waffle Coin">
+          <div>
+            <div class="hudLabel">Waffle Coins</div>
+            <div class="hudValue" id="hudCoins">0</div>
+          </div>
+        </div>
+
+        <div class="hudStat">
+          <div class="hudLabel">Voting %</div>
+          <div class="hudValue" id="hudVotePct">0%</div>
+        </div>
+
+        <div class="hudStat">
+          <div class="hudLabel">Total Votes</div>
+          <div class="hudValue" id="hudVoteCount">0</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN GRID -->
+    <main class="grid">
+
+      <!-- STANDINGS OVERLAY -->
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>Standings</h2>
+          <div class="tabs">
+            <button class="tabBtn active" data-tabgroup="standings" data-tab="league">League</button>
+            <button class="tabBtn" data-tabgroup="standings" data-tab="solar">Solar</button>
+            <button class="tabBtn" data-tabgroup="standings" data-tab="lunar">Lunar</button>
+          </div>
+        </div>
+
+        <div class="tabContent active" data-tabgroup="standings" data-tab="league">
+          <div id="standingsLeague"></div>
+        </div>
+
+        <div class="tabContent" data-tabgroup="standings" data-tab="solar">
+          <div class="confHeader">
+            <img class="confLogo" src="assets/logos/conferences/solar.png" alt="Solar">
+            <div class="confTitle">Solar Conference</div>
+          </div>
+          <div id="standingsSolar"></div>
+        </div>
+
+        <div class="tabContent" data-tabgroup="standings" data-tab="lunar">
+          <div class="confHeader">
+            <img class="confLogo" src="assets/logos/conferences/lunar.png" alt="Lunar">
+            <div class="confTitle">Lunar Conference</div>
+          </div>
+          <div id="standingsLunar"></div>
+        </div>
+      </section>
+
+      <!-- VOTING + SHOP + COLLECTION -->
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>Voting & Shops</h2>
+          <div class="tabs">
+            <button class="tabBtn active" data-tabgroup="right" data-tab="voting">Voting</button>
+            <button class="tabBtn" data-tabgroup="right" data-tab="giftshop">Mask’s Gift Shop</button>
+            <button class="tabBtn" data-tabgroup="right" data-tab="collection">Collection</button>
+            <button class="tabBtn" data-tabgroup="right" data-tab="cafe">Cafe De Waffles</button>
+          </div>
+        </div>
+
+        <div class="tabContent active" data-tabgroup="right" data-tab="voting">
+          <div class="panelNote" id="votingMeta">Next game day: loading...</div>
+          <div id="votingList"></div>
+          <button class="primaryBtn" id="submitVotesBtn">Submit Votes</button>
+          <div class="smallNote" id="voteLockNote"></div>
+        </div>
+
+        <div class="tabContent" data-tabgroup="right" data-tab="giftshop">
+          <button class="primaryBtn" id="openGiftShopBtn">Enter Gift Shop</button>
+          <div class="smallNote">Purchase items → go to Collection (stack rules apply where relevant).</div>
+        </div>
+
+        <div class="tabContent" data-tabgroup="right" data-tab="collection">
+          <button class="primaryBtn" id="openCollectionBtn">Open Collection</button>
+          <div class="smallNote">Recently obtained items glow with a gold trim.</div>
+        </div>
+
+        <div class="tabContent" data-tabgroup="right" data-tab="cafe">
+          <div class="cafeHeader">
+            <img class="cafeLogo" src="assets/shop/cafe-de-waffles.png" alt="Cafe De Waffles">
+            <div>
+              <div class="confTitle">Cafe De Waffles</div>
+              <div class="smallNote">Food is stackable up to 10 per item.</div>
+            </div>
+          </div>
+          <div id="cafeMenu"></div>
+        </div>
+      </section>
+
+      <!-- LEAGUE LEADERS -->
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>League Leaders</h2>
+          <div class="tabs">
+            <button class="tabBtn active" data-tabgroup="leaders" data-tab="hr">HR</button>
+            <button class="tabBtn" data-tabgroup="leaders" data-tab="runs">Runs</button>
+            <button class="tabBtn" data-tabgroup="leaders" data-tab="rbi">RBI</button>
+            <button class="tabBtn" data-tabgroup="leaders" data-tab="bavg">BAVG</button>
+            <button class="tabBtn" data-tabgroup="leaders" data-tab="mvp">MVP</button>
+            <button class="tabBtn" data-tabgroup="leaders" data-tab="so">SO</button>
+          </div>
+        </div>
+        <div id="leadersContent"></div>
+      </section>
+
+      <!-- PREDICTIONS + SLOTS -->
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>Predictions & Slots</h2>
+          <div class="tabs">
+            <button class="tabBtn active" data-tabgroup="fun" data-tab="pred">Prediction Leaders</button>
+            <button class="tabBtn" data-tabgroup="fun" data-tab="slots">Ploopy’s Slick Slots</button>
+          </div>
+        </div>
+
+        <div class="tabContent active" data-tabgroup="fun" data-tab="pred">
+          <div id="predictionLeaders"></div>
+        </div>
+
+        <div class="tabContent" data-tabgroup="fun" data-tab="slots">
+          <button class="primaryBtn" id="openSlotsBtn">Play Slots</button>
+          <div class="smallNote">Costs 1 coin. Jackpot win starts at 500 and doubles per streak. Hopedogo triple = auto loss.</div>
+        </div>
+      </section>
+
+      <!-- GAME LOGS + SUGGESTIONS -->
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>Season & Suggestions</h2>
+          <div class="tabs">
+            <button class="tabBtn active" data-tabgroup="season" data-tab="logs">Season 1 Game Logs</button>
+            <button class="tabBtn" data-tabgroup="season" data-tab="suggest">Future Season Suggestions</button>
+          </div>
+        </div>
+
+        <div class="tabContent active" data-tabgroup="season" data-tab="logs">
+          <div id="gameLogs"></div>
+        </div>
+
+        <div class="tabContent" data-tabgroup="season" data-tab="suggest">
+          <textarea id="suggestionText" class="textArea" placeholder="Buff/Nerf suggestions... (1 per day)"></textarea>
+          <button class="primaryBtn" id="submitSuggestionBtn">Submit Suggestion</button>
+          <div class="smallNote" id="suggestionNote"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ESPN style ticker -->
+    <div class="ticker" id="ticker">
+      <div class="tickerInner" id="tickerInner"></div>
+    </div>
+
+    <!-- Expanded headlines drawer -->
+    <div class="tickerDrawer hidden" id="tickerDrawer">
+      <div class="drawerHeader">
+        <div class="drawerTitle">Headlines</div>
+        <button class="ghostBtn" id="closeDrawerBtn">Close</button>
+      </div>
+      <div id="headlineList"></div>
+    </div>
+
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal hidden" id="authModal">
+    <div class="modalCard">
+      <h3>Sign Up / Login</h3>
+      <div class="smallNote">We never display emails publicly. Username is what everyone sees.</div>
+
+      <input class="input" id="authEmail" placeholder="Email" type="email" />
+      <input class="input" id="authPass" placeholder="Password" type="password" />
+      <input class="input" id="authUsername" placeholder="Username (new accounts)" />
+
+      <div class="modalRow">
+        <button class="primaryBtn" id="signupBtn">Create Account</button>
+        <button class="ghostBtn" id="loginBtn">Login</button>
+      </div>
+
+      <div class="smallNote" id="authMsg"></div>
+    </div>
+  </div>
+
+  <!-- REWARD POPUP -->
+  <div class="modal hidden" id="rewardModal">
+    <div class="modalCard">
+      <h3>Game Day Results</h3>
+      <div id="rewardText"></div>
+      <button class="primaryBtn" id="rewardCloseBtn">Nice!</button>
+    </div>
+  </div>
+
+  <!-- BIG MODALS -->
+  <div class="modal hidden" id="giftShopModal"><div class="bigCard" id="giftShopCard"></div></div>
+  <div class="modal hidden" id="collectionModal"><div class="bigCard" id="collectionCard"></div></div>
+  <div class="modal hidden" id="slotsModal"><div class="bigCard" id="slotsCard"></div></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

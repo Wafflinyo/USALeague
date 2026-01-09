@@ -1,0 +1,30 @@
+{
+  "homeruns": [
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 }
+  ],
+  "rbis": [
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 }
+  ],
+  "runs": [
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 }
+  ],
+  "strikeouts": [
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 },
+    { "player": "Player Name", "team": "Team Name", "value": 0 }
+  ]
+}

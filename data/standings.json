@@ -1,0 +1,41 @@
+{
+  "leagueOrder": [
+    "Narf Bullets",
+    "Nashville Knights",
+    "Comet Eons",
+    "Egg Beaters",
+    "Dreary Lane",
+    "Waffle Batters",
+    "BRF Bombers",
+    "MK Monarchs",
+    "Hopedogo Retrievers",
+    "Lunar Eclypse"
+  ],
+  "lunarTeams": [
+    "Egg Beaters",
+    "Dreary Lane",
+    "Waffle Batters",
+    "BRF Bombers",
+    "Lunar Eclypse"
+  ],
+  "solarTeams": [
+    "Narf Bullets",
+    "Nashville Knights",
+    "Comet Eons",
+    "MK Monarchs",
+    "Hopedogo Retrievers"
+  ],
+  "teams": [
+    { "name": "Egg Beaters", "conference": "Lunar", "logo": "assets/logos/teams/egg-beaters.png", "wins": 1, "losses": 0, "runsFor": 4, "runsAgainst": 3 },
+    { "name": "Dreary Lane", "conference": "Lunar", "logo": "assets/logos/teams/dreary-lane.png", "wins": 1, "losses": 0, "runsFor": 1, "runsAgainst": 0 },
+    { "name": "Waffle Batters", "conference": "Lunar", "logo": "assets/logos/teams/waffle-batters.png", "wins": 0, "losses": 1, "runsFor": 3, "runsAgainst": 4 },
+    { "name": "BRF Bombers", "conference": "Lunar", "logo": "assets/logos/teams/brf-bombers.png", "wins": 0, "losses": 1, "runsFor": 0, "runsAgainst": 1 },
+    { "name": "Lunar Eclypse", "conference": "Lunar", "logo": "assets/logos/teams/lunar-eclypse.png", "wins": 0, "losses": 1, "runsFor": 1, "runsAgainst": 7 },
+
+    { "name": "Narf Bullets", "conference": "Solar", "logo": "assets/logos/teams/narf-bullets.png", "wins": 1, "losses": 0, "runsFor": 7, "runsAgainst": 1 },
+    { "name": "Nashville Knights", "conference": "Solar", "logo": "assets/logos/teams/nashville-knights.png", "wins": 1, "losses": 0, "runsFor": 7, "runsAgainst": 2 },
+    { "name": "Comet Eons", "conference": "Solar", "logo": "assets/logos/teams/comet-eons.png", "wins": 1, "losses": 0, "runsFor": 8, "runsAgainst": 5 },
+    { "name": "MK Monarchs", "conference": "Solar", "logo": "assets/logos/teams/mk-monarchs.png", "wins": 0, "losses": 1, "runsFor": 5, "runsAgainst": 8 },
+    { "name": "Hopedogo Retrievers", "conference": "Solar", "logo": "assets/logos/teams/hopedogo-retrievers.png", "wins": 0, "losses": 1, "runsFor": 2, "runsAgainst": 7 }
+  ]
+}
