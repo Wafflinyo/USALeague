@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Public-ish user data (for prediction leaderboard)
+    match /users/{uid} {
+      allow read: if signedIn();
+
+      // Users can only set username from client.
+      // Coins, vote stats, slots streak, etc are server-only via Functions.
+      allow create: if isMe(uid);
+      allow update: if isMe(uid)
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(["username"]);
+      allow delete: if false;
+
+      // Inventory: user can read their own, but only Functions can write
+      match /collection/{itemId} {
+        allow read: if isMe(uid);
+        allow write: if false;
+      }
+    }
+
+    // Votes: user can write their own vote doc; lock + payouts enforced in Functions
+    match /seasons/{seasonId}/gameDays/{date}/votes/{uid} {
+      allow read: if isMe(uid);
+      allow write: if isMe(uid);
+    }
+
+    // Reward popups: user can read theirs; only Functions write/mark
+    match /rewardPopups/{docId} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Announcements (jackpot etc): signed-in users can read; Functions write
+    match /announcements/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Shop catalog: signed-in users can read; only you should edit in console
+    match /shopItems/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Suggestions: only Functions handle (1/day)
+    match /suggestions/{id} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}

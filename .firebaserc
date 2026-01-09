@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "usa-league-web",
+    "usaleague": "usa-league-web-83a2b"
+  },
+  "targets": {},
+  "etags": {}
+}
