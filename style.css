@@ -2,28 +2,7 @@
    GLOBAL / THEME
    =============================== */
 
-* { box-sizing: border-box; }
 
-:root{
-  /* ---- Change these to theme your entire app ---- */
-  --bg-color: #0b1020;                 /* fallback background color */
-  --bg-image: url("assets/backgrounds/usa-bg.png"); /* optional background PNG */
-  --bg-use-image: 0;                   /* 1 = use image, 0 = solid color */
-  --overlay: rgba(0,0,0,0.55);         /* darkness over background */
-
-  --card: rgba(255,252,245,0.94);
-  --card-strong: rgba(255,252,245,0.98);
-  --stroke: rgba(0,0,0,0.18);
-
-  --text: #111;
-  --muted: rgba(0,0,0,0.75);
-
-  --radius: 14px;
-  --shadow: 0 10px 24px rgba(0,0,0,0.18);
-
-  --btn: #1b1b1f;
-  --btnText: #ffffff;
-}
 
 /* Full-page background that covers the entire scroll height */
 html, body{
