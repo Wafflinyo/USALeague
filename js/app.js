@@ -39,26 +39,6 @@ async function initStaticPanels() {
 }
 
 // -----------------------------
-// Ticker Drawer controls
-// -----------------------------
-function initTickerDrawer() {
-  const ticker = el("ticker");
-  const drawer = el("tickerDrawer");
-  const closeBtn = el("closeDrawerBtn");
-
-  if (!ticker || !drawer || !closeBtn) return;
-
-  ticker.addEventListener("click", () => {
-    drawer.classList.remove("hidden");
-  });
-
-  closeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    drawer.classList.add("hidden");
-  });
-}
-
-// -----------------------------
 // Watch logged-in user (from window.__USA_UID__)
 // Your index.html sets window.__USA_UID__ on login.
 // -----------------------------
@@ -117,7 +97,6 @@ function watchUidAndAttachListener() {
 // Boot
 // -----------------------------
 initTabs();         // makes all your .tabBtn switch .tabContent
-initTickerDrawer(); // lets ticker open/close drawer
 initStaticPanels(); // standings/leaders/logs/ticker text
 
 // Live features (they can read window.__USA_UID__ when needed)
