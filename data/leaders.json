@@ -36,15 +36,15 @@
     { "player": "Fire Bro", "team": "Narf Bullets", "value": 0 }
   ],
   "strikeouts": [
-{ "player": "Player Name", "team": "Team Name", "value": 0 },
     { "player": "Ronald McDonald", "team": "Dreary Lane", "value": 2 },
     { "player": "Wiggler", "team": "Hopedogo Retrievers", "value": 1 },
     { "player": "Funky Kong", "team": "MK Monarchs", "value": 1 },
     { "player": "Mario", "team": "MK Monarchs", "value": 1 },
     { "player": "Bowser Jr", "team": "Narf Bullets", "value": 1 },
-    { "player": "N/A", "team": "N/A", "value": 0 },
-    { "player": "N/A", "team": "N/A", "value": 0 },
-    { "player": "N/A", "team": "N/A", "value": 0 },
-    { "player": "N/A", "team": "N/A", "value": 0 }
+    { "player": "N/A", "team": "N/A", "value": null },
+    { "player": "N/A", "team": "N/A", "value": null },
+    { "player": "N/A", "team": "N/A", "value": null },
+    { "player": "N/A", "team": "N/A", "value": null },
+    { "player": "N/A", "team": "N/A", "value": null }
   ]
 }
