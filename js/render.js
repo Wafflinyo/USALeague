@@ -55,14 +55,32 @@ function makeTable(rows){
 }
 
 export function renderStandings(data){
-  const teams = data.teams ?? [];
-  const solar = teams.filter(t => t.conference === "Solar");
-  const lunar = teams.filter(t => t.conference === "Lunar");
+  const teamsRaw = data.teams ?? [];
 
-  el("standingsLeague").innerHTML = makeTable(teams);
+  // Make copies so we don't mutate original array
+  const teamsLeague = teamsRaw.slice();
+
+  // League-wide order: W desc, L asc, RD desc, then name
+  teamsLeague.sort((a,b) => {
+    const aRD = (a.runsFor ?? 0) - (a.runsAgainst ?? 0);
+    const bRD = (b.runsFor ?? 0) - (b.runsAgainst ?? 0);
+
+    if ((b.wins ?? 0) !== (a.wins ?? 0)) return (b.wins ?? 0) - (a.wins ?? 0);
+    if ((a.losses ?? 0) !== (b.losses ?? 0)) return (a.losses ?? 0) - (b.losses ?? 0);
+    if (bRD !== aRD) return bRD - aRD;
+
+    return String(a.name ?? "").localeCompare(String(b.name ?? ""));
+  });
+
+  // Conference tables keep their own conference filtering
+  const solar = teamsRaw.filter(t => t.conference === "Solar");
+  const lunar = teamsRaw.filter(t => t.conference === "Lunar");
+
+  el("standingsLeague").innerHTML = makeTable(teamsLeague);
   el("standingsSolar").innerHTML = makeTable(solar);
   el("standingsLunar").innerHTML = makeTable(lunar);
 }
+
 
 export function renderLeaders(data){
   // store globally so tabs can rerender

@@ -376,3 +376,12 @@ h2{
   overflow: auto;
   box-shadow: var(--shadow);
 }
+
+body{
+  background-image: url("./assets/backgrounds/usa-bg.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
