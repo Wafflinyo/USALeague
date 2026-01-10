@@ -2,18 +2,35 @@
    GLOBAL / THEME
    =============================== */
 
+*{ box-sizing:border-box; }
 
+:root{
+  /* Readability + shape */
+  --card: rgba(255,252,245,0.88);          /* panels/hud */
+  --card-strong: rgba(255,252,245,0.94);   /* modals/drawers */
+  --stroke: rgba(0,0,0,0.38);              /* stronger outline */
+  --stroke-soft: rgba(0,0,0,0.18);
 
-/* Full-page background that covers the entire scroll height */
-html, body{
-  min-height: 100%;
+  --text: #0e1116;
+  --muted: rgba(0,0,0,0.72);
+
+  --radius: 14px;
+  --shadow: 0 14px 34px rgba(0,0,0,0.24);
+
+  --btn: #14161d;
+  --btnText: #ffffff;
 }
 
-body{
-  margin: 0;
+/* Full-page background that covers the entire scroll height */
+html, body{ min-height:100%; }
 
-  /* Base colors (optional fallback) */
-  background-color: #0b1020;
+body{
+  margin:0;
+  font-family: system-ui, Arial, sans-serif;
+  color: var(--text);
+
+  /* Fallback */
+  background-color:#0b1020;
 
   /* Layered background:
      1) stars (tiny dots)
@@ -22,7 +39,6 @@ body{
      4) sunset/night split gradient
   */
   background-image:
-    /* Stars */
     radial-gradient(circle at 20% 25%, rgba(255,255,255,0.9) 1px, transparent 1.5px),
     radial-gradient(circle at 70% 18%, rgba(255,255,255,0.8) 1px, transparent 1.5px),
     radial-gradient(circle at 45% 40%, rgba(255,255,255,0.7) 1px, transparent 1.5px),
@@ -30,17 +46,14 @@ body{
     radial-gradient(circle at 60% 75%, rgba(255,255,255,0.65) 1px, transparent 1.5px),
     radial-gradient(circle at 30% 65%, rgba(255,255,255,0.7) 1px, transparent 1.5px),
 
-    /* Subtle night glow */
     radial-gradient(circle at 75% 30%, rgba(90,140,255,0.18), transparent 55%),
 
-    /* Sun rays (fan from left side) */
     repeating-conic-gradient(
       from -20deg at 18% 35%,
       rgba(255, 230, 160, 0.22) 0deg 10deg,
       rgba(255, 230, 160, 0.00) 10deg 20deg
     ),
 
-    /* Sunset (left) -> Night (right) split */
     linear-gradient(
       90deg,
       #ffb24a 0%,
@@ -49,28 +62,20 @@ body{
       #0b1020 100%
     );
 
-  /* Make the pattern repeat vertically so it never “ends” */
   background-size:
-    220px 220px, /* stars */
+    220px 220px,
     260px 260px,
     240px 240px,
     300px 300px,
     280px 280px,
     320px 320px,
-    1200px 900px, /* night glow */
-    1400px 1400px, /* rays */
-    cover;          /* main gradient */
+    1200px 900px,
+    1400px 1400px,
+    cover;
 
   background-repeat:
-    repeat,
-    repeat,
-    repeat,
-    repeat,
-    repeat,
-    repeat,
-    no-repeat,
-    no-repeat,
-    no-repeat;
+    repeat, repeat, repeat, repeat, repeat, repeat,
+    no-repeat, no-repeat, no-repeat;
 
   background-position:
     0 0,
@@ -83,33 +88,19 @@ body{
     center,
     center;
 
-  /* KEY: keeps it stable while scrolling */
+  /* Key: doesn't “end” on scroll */
   background-attachment:
-    scroll,
-    scroll,
-    scroll,
-    scroll,
-    scroll,
-    scroll,
-    scroll,
-    scroll,
-    fixed;
+    scroll, scroll, scroll, scroll, scroll, scroll,
+    scroll, scroll, fixed;
 }
-
-
-/* If you want a PURE solid background (no image at all),
-   delete the background-image lines above and keep just:
-   background: var(--bg-color);
-*/
 
 /* ===============================
    PAGE OVERLAY / LAYOUT
    =============================== */
 
 .pageOverlay{
-  min-height: 100vh;
-  padding: 14px 14px 70px 14px;
-  /* Keep this transparent because the body has the overlay already */
+  min-height:100vh;
+  padding:14px 14px 70px 14px;
   background: transparent;
   color: var(--text);
 }
@@ -123,20 +114,23 @@ body{
   align-items:center;
   justify-content:space-between;
   gap:14px;
+
   padding:12px 14px;
   border-radius: var(--radius);
+
   background: var(--card);
-  border: 1px solid var(--stroke);
+  border: 2px solid var(--stroke);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
+
+  backdrop-filter: blur(8px);
 }
 
 .hudLeft{ display:flex; align-items:center; gap:12px; }
 .hudLogo{ width:112px; height:112px; object-fit:contain; }
 
 .hudTitleBlock{ display:flex; flex-direction:column; gap:2px; }
-.hudTitle{ font-weight:950; font-size:18px; letter-spacing: 0.2px; }
-.hudSub{ opacity:0.8; font-weight:800; font-size: 13px; }
+.hudTitle{ font-weight:950; font-size:18px; letter-spacing:0.2px; }
+.hudSub{ opacity:0.85; font-weight:800; font-size:13px; color: var(--muted); }
 
 .hudRight{
   display:flex;
@@ -149,17 +143,16 @@ body{
 .hudStat{
   padding:8px 10px;
   border-radius:12px;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(255,255,255,0.55);
+  border: 1px solid var(--stroke-soft);
 }
 
-.hudLabel{ font-size:12px; opacity:0.75; font-weight:900; }
+.hudLabel{ font-size:12px; opacity:0.85; font-weight:900; color: var(--muted); }
 .hudValue{ font-weight:950; }
 
 .hudCoins{ display:flex; align-items:center; gap:10px; }
 .coinIcon{ width:32px; height:32px; object-fit:contain; }
 
-/* optional: logout button spacing inside hud */
 .hudLogout{ margin-left: 6px; }
 
 /* ===============================
@@ -167,23 +160,24 @@ body{
    =============================== */
 
 .grid{
-  margin-top: 12px;
-  display: grid;
+  margin-top:12px;
+  display:grid;
   grid-template-columns: repeat(2, minmax(280px, 1fr));
-  gap: 12px;
+  gap:12px;
 }
-
-@media (max-width: 1000px){
+@media (max-width:1000px){
   .grid{ grid-template-columns: 1fr; }
 }
 
 .panel{
-  padding: 14px;
+  padding:14px;
   border-radius: var(--radius);
+
   background: var(--card);
-  border: 1px solid var(--stroke);
+  border: 2px solid var(--stroke);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
+
+  backdrop-filter: blur(8px);
 }
 
 .panelHeader{
@@ -194,24 +188,18 @@ body{
   flex-wrap:wrap;
 }
 
-h2{
-  margin:0;
-  font-size:16px;
-  font-weight:950;
-}
+h2{ margin:0; font-size:16px; font-weight:950; }
 
 .panelNote{
-  opacity:0.85;
-  font-weight:800;
   margin-top:6px;
+  font-weight:800;
   color: var(--muted);
 }
 
 .smallNote{
-  opacity:0.8;
+  margin-top:8px;
   font-size:12px;
   font-weight:800;
-  margin-top:8px;
   color: var(--muted);
 }
 
@@ -222,24 +210,25 @@ h2{
 .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
 
 .tabBtn{
-  border: 1px solid rgba(0,0,0,0.18);
-  background: rgba(255,255,255,0.75);
+  border: 2px solid rgba(0,0,0,0.22);
+  background: rgba(255,255,255,0.72);
   border-radius: 999px;
   padding: 8px 10px;
   font-weight: 950;
   cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+
+  transition: background 120ms ease, border-color 120ms ease;
 }
 
-.tabBtn:hover{ transform: translateY(-1px); }
-.tabBtn:active{ transform: translateY(0px); }
+/* IMPORTANT: remove the "jump" on hover */
+.tabBtn:hover{ background: rgba(255,255,255,0.90); }
+.tabBtn:active{ filter: brightness(0.98); }
 
 .tabBtn.active{
-  background: rgba(0,0,0,0.08);
-  border-color: rgba(0,0,0,0.25);
+  background: rgba(20,22,29,0.10);
+  border-color: rgba(0,0,0,0.40);
 }
 
-/* Your existing JS toggles .active, so we keep these */
 .tabContent{ display:none; margin-top:10px; }
 .tabContent.active{ display:block; }
 
@@ -248,49 +237,46 @@ h2{
    =============================== */
 
 .primaryBtn{
-  margin-top: 10px;
-  border: none;
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-weight: 950;
-  cursor: pointer;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:950;
+  cursor:pointer;
   background: var(--btn);
   color: var(--btnText);
-  transition: transform 120ms ease, filter 120ms ease;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
 
-.primaryBtn:hover{ filter: brightness(1.08); transform: translateY(-1px); }
-.primaryBtn:active{ transform: translateY(0px); filter: brightness(1.00); }
+.primaryBtn:hover{ filter: brightness(1.06); }
+.primaryBtn:active{ filter: brightness(0.98); }
 
 .ghostBtn{
-  border: 1px solid rgba(0,0,0,0.22);
-  background: rgba(255,255,255,0.35);
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-weight: 950;
-  cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease;
+  border: 2px solid rgba(0,0,0,0.22);
+  background: rgba(255,255,255,0.55);
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:950;
+  cursor:pointer;
 }
 
-.ghostBtn:hover{ background: rgba(255,255,255,0.55); transform: translateY(-1px); }
-.ghostBtn:active{ transform: translateY(0px); }
+.ghostBtn:hover{ background: rgba(255,255,255,0.75); }
+.ghostBtn:active{ filter: brightness(0.98); }
 
 .input, .textArea{
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.22);
-  margin-top: 10px;
-  font-weight: 800;
-  background: rgba(255,255,255,0.85);
-  outline: none;
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:2px solid rgba(0,0,0,0.22);
+  margin-top:10px;
+  font-weight:800;
+  background: rgba(255,255,255,0.92);
+  outline:none;
 }
-
 .input:focus, .textArea:focus{
-  border-color: rgba(0,0,0,0.35);
+  border-color: rgba(0,0,0,0.40);
 }
-
-.textArea{ min-height: 120px; resize: vertical; }
+.textArea{ min-height:120px; resize:vertical; }
 
 /* ===============================
    TABLES
@@ -299,33 +285,24 @@ h2{
 .table{
   width:100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top:10px;
 }
 
 .table th, .table td{
-  border-bottom: 1px solid rgba(0,0,0,0.12);
-  padding: 10px;
-  text-align: left;
+  border-bottom: 1px solid rgba(0,0,0,0.16);
+  padding:10px;
+  text-align:left;
 }
 
 .table th{
-  font-size: 12px;
-  opacity: 0.85;
-  font-weight: 950;
+  font-size:12px;
+  opacity:0.9;
+  font-weight:950;
+  color: var(--muted);
 }
 
-.teamCell{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight: 950;
-}
-
-.teamLogo{
-  width: 54px;
-  height: 54px;
-  object-fit: contain;
-}
+.teamCell{ display:flex; align-items:center; gap:10px; font-weight:950; }
+.teamLogo{ width:54px; height:54px; object-fit:contain; }
 
 /* ===============================
    LITTLE HEADERS
@@ -333,7 +310,7 @@ h2{
 
 .confHeader{ display:flex; align-items:center; gap:10px; margin:8px 0 4px 0; }
 .confLogo{ width:90px; height:90px; object-fit:contain; }
-.confTitle{ font-weight: 950; }
+.confTitle{ font-weight:950; }
 
 .cafeHeader{ display:flex; align-items:center; gap:12px; margin-top:10px; }
 .cafeLogo{ width:46px; height:46px; object-fit:contain; }
@@ -345,25 +322,24 @@ h2{
 .ticker{
   position: fixed;
   left:0; right:0; bottom:0;
-  height: 52px;
+  height:52px;
   background: rgba(0,0,0,0.90);
-  color: #fff;
+  color:#fff;
   display:flex;
   align-items:center;
   overflow:hidden;
   cursor:pointer;
   border-top: 1px solid rgba(255,255,255,0.15);
-  z-index: 40;
+  z-index:40;
 }
 
 .tickerInner{
-  white-space: nowrap;
-  display: inline-block;
-  padding-left: 100%;
+  white-space:nowrap;
+  display:inline-block;
+  padding-left:100%;
   animation: ticker 22s linear infinite;
-  font-weight: 950;
+  font-weight:950;
 }
-
 @keyframes ticker{
   0%{ transform: translateX(0); }
   100%{ transform: translateX(-100%); }
@@ -371,19 +347,19 @@ h2{
 
 .tickerDrawer{
   position: fixed;
-  left: 10px; right: 10px; bottom: 60px;
-  max-height: 45vh;
-  overflow: auto;
-  padding: 12px;
+  left:10px; right:10px; bottom:60px;
+  max-height:45vh;
+  overflow:auto;
+  padding:12px;
   border-radius: var(--radius);
   background: var(--card-strong);
-  border: 1px solid rgba(0,0,0,0.2);
+  border: 2px solid var(--stroke);
   box-shadow: var(--shadow);
-  z-index: 45;
+  z-index:45;
 }
 
 .drawerHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.drawerTitle{ font-weight: 950; }
+.drawerTitle{ font-weight:950; }
 
 /* ===============================
    MODALS
@@ -393,21 +369,21 @@ h2{
 
 .modal{
   position: fixed;
-  inset: 0;
+  inset:0;
   background: rgba(0,0,0,0.60);
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 14px;
-  z-index: 50;
+  padding:14px;
+  z-index:50;
 }
 
 .modalCard{
   width: min(520px, 95vw);
   background: var(--card-strong);
   border-radius: 16px;
-  padding: 14px;
-  border: 1px solid rgba(0,0,0,0.2);
+  padding:14px;
+  border: 2px solid var(--stroke);
   box-shadow: var(--shadow);
 }
 
@@ -418,17 +394,8 @@ h2{
   height: min(680px, 86vh);
   background: var(--card-strong);
   border-radius: 16px;
-  padding: 14px;
-  border: 1px solid rgba(0,0,0,0.2);
-  overflow: auto;
+  padding:14px;
+  border: 2px solid var(--stroke);
+  overflow:auto;
   box-shadow: var(--shadow);
 }
-
-body{
-  background-image: url("./assets/backgrounds/usa-bg.png") !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: fixed !important;
-}
-
