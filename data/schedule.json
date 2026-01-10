@@ -1,7 +1,7 @@
 {
   "games": [
     {
-      "date": "2026-01-08",
+      "date": "2026-01-07",
       "conference": "Solar",
       "away": "MK Monarchs",
       "home": "Comet Eons",
@@ -9,7 +9,7 @@
       "homeScore": 8
     },
     {
-      "date": "2026-01-08",
+      "date": "2026-01-07",
       "conference": "Lunar",
       "away": "Waffle Batters",
       "home": "Egg Beaters",
@@ -17,7 +17,7 @@
       "homeScore": 4
     },
     {
-      "date": "2026-01-08",
+      "date": "2026-01-07",
       "conference": "Lunar",
       "away": "Dreary Lane",
       "home": "BRF Bombers",
@@ -25,7 +25,7 @@
       "homeScore": 0
     },
     {
-      "date": "2026-01-08",
+      "date": "2026-01-07",
       "conference": "OOC",
       "away": "Narf Bullets",
       "home": "Lunar Eclypse",
@@ -33,7 +33,7 @@
       "homeScore": 1
     },
     {
-      "date": "2026-01-08",
+      "date": "2026-01-07",
       "conference": "Solar",
       "away": "Hopedogo Retrievers",
       "home": "Nashville Knights",
@@ -41,7 +41,7 @@
       "homeScore": 7
     },
     {
-      "date": "2026-01-11",
+      "date": "2026-01-10",
       "conference": "Lunar",
       "away": "Dreary Lane",
       "home": "Waffle Batters",
@@ -49,7 +49,7 @@
       "homeScore": null
     },
     {
-      "date": "2026-01-11",
+      "date": "2026-01-10",
       "conference": "Lunar",
       "away": "BRF Bombers",
       "home": "Lunar Eclypse",
@@ -57,7 +57,7 @@
       "homeScore": null
     },
     {
-      "date": "2026-01-11",
+      "date": "2026-01-10",
       "conference": "Solar",
       "away": "Nashville Knights",
       "home": "Comet Eons",
@@ -65,7 +65,7 @@
       "homeScore": null
     },
     {
-      "date": "2026-01-11",
+      "date": "2026-01-10",
       "conference": "Solar",
       "away": "Hopedogo Retrievers",
       "home": "Narf Bullets",
@@ -73,7 +73,7 @@
       "homeScore": null
     },
     {
-      "date": "2026-01-11",
+      "date": "2026-01-10",
       "conference": "OOC",
       "away": "Egg Beaters",
       "home": "MK Monarchs",
