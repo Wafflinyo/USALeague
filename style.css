@@ -85,7 +85,7 @@ body{
 }
 
 .hudLeft{ display:flex; align-items:center; gap:12px; }
-.hudLogo{ width:64px; height:64px; object-fit:contain; }
+.hudLogo{ width:112px; height:112px; object-fit:contain; }
 
 .hudTitleBlock{ display:flex; flex-direction:column; gap:2px; }
 .hudTitle{ font-weight:950; font-size:18px; letter-spacing: 0.2px; }
@@ -110,7 +110,7 @@ body{
 .hudValue{ font-weight:950; }
 
 .hudCoins{ display:flex; align-items:center; gap:10px; }
-.coinIcon{ width:26px; height:26px; object-fit:contain; }
+.coinIcon{ width:32px; height:32px; object-fit:contain; }
 
 /* optional: logout button spacing inside hud */
 .hudLogout{ margin-left: 6px; }
@@ -275,8 +275,8 @@ h2{
 }
 
 .teamLogo{
-  width: 34px;
-  height: 34px;
+  width: 54px;
+  height: 54px;
   object-fit: contain;
 }
 
@@ -285,7 +285,7 @@ h2{
    =============================== */
 
 .confHeader{ display:flex; align-items:center; gap:10px; margin:8px 0 4px 0; }
-.confLogo{ width:40px; height:40px; object-fit:contain; }
+.confLogo{ width:90px; height:90px; object-fit:contain; }
 .confTitle{ font-weight: 950; }
 
 .cafeHeader{ display:flex; align-items:center; gap:12px; margin-top:10px; }
