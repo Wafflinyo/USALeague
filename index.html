@@ -257,7 +257,7 @@
        ========================= -->
 
   <script type="module">
-    import { auth, db } from "./js/firebase.js";
+    import { callFn } from "./js/firebase.js";
     import { signup, login, logout, watchAuth, ensureDailyBonus } from "./js/auth.js";
     import { initRewardPopup } from "./js/rewards.js";
     import { callFn } from "./js/firebase.js";
@@ -290,32 +290,33 @@
     };
 
     // optional logout (if your app.js wants to control it, it can also hook it)
+    // optional logout
     const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) logoutBtn.onclick = () => logout();
+    if (logoutBtn) logoutBtn.onclick = async () => {
+      window.__USA_UID__ = null;
+      await logout();
+    };
 
     // reward popup watcher
-    initRewardPopup();
+      initRewardPopup();
 
-    // auth state
     watchAuth(async (user) => {
       if (!user) {
-        loginPanel.classList.remove("hidden");
-        appRoot.classList.add("hidden");
-        return;
-      }
+      window.__USA_UID__ = null;
+      loginPanel.classList.remove("hidden");
+      appRoot.classList.add("hidden");
+      return;
+    }
 
-      loginPanel.classList.add("hidden");
-      appRoot.classList.remove("hidden");
+  window.__USA_UID__ = user.uid; // set ASAP
 
-      // daily bonus (50/day)
-      try { await ensureDailyBonus(user.uid); } catch {}
+  loginPanel.classList.add("hidden");
+  appRoot.classList.remove("hidden");
 
-      // safe to call each load (payout only happens once)
-      try { await callFn("syncMyResults")({}); } catch {}
+  try { await ensureDailyBonus(user.uid); } catch {}
+  try { await callFn("syncMyResults")({}); } catch {}
+});
 
-      // If your existing app.js needs the user, you can store it globally:
-      window.__USA_UID__ = user.uid;
-    });
   </script>
 
   <!-- keep your existing app logic -->

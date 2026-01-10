@@ -1,144 +1,322 @@
-*{ box-sizing:border-box; }
-body{ margin:0; font-family: system-ui, Arial, sans-serif; }
+/* ===============================
+   GLOBAL / THEME
+   =============================== */
 
-.pageOverlay{
-  min-height:100vh;
-  padding: 14px 14px 70px 14px;
-  background: rgba(0,0,0,0.45);
-  color:#111;
+* { box-sizing: border-box; }
+
+:root{
+  /* ---- Change these to theme your entire app ---- */
+  --bg-color: #0b1020;                 /* fallback background color */
+  --bg-image: url("assets/backgrounds/usa-bg.png"); /* optional background PNG */
+  --bg-use-image: 0;                   /* 1 = use image, 0 = solid color */
+  --overlay: rgba(0,0,0,0.55);         /* darkness over background */
+
+  --card: rgba(255,252,245,0.94);
+  --card-strong: rgba(255,252,245,0.98);
+  --stroke: rgba(0,0,0,0.18);
+
+  --text: #111;
+  --muted: rgba(0,0,0,0.75);
+
+  --radius: 14px;
+  --shadow: 0 10px 24px rgba(0,0,0,0.18);
+
+  --btn: #1b1b1f;
+  --btnText: #ffffff;
 }
 
-/* HUD */
+html, body{
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family: system-ui, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg-color);
+}
+
+/* Optional background image toggle.
+   To enable image background:
+   set --bg-use-image: 1 in :root
+*/
+body{
+  background:
+    linear-gradient(var(--overlay), var(--overlay)),
+    /* this image layer only “shows” when you set --bg-use-image: 1 */
+    /* (if you keep it 0, the image layer is still there but overlay + fallback makes it effectively invisible) */
+    var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* If you want a PURE solid background (no image at all),
+   delete the background-image lines above and keep just:
+   background: var(--bg-color);
+*/
+
+/* ===============================
+   PAGE OVERLAY / LAYOUT
+   =============================== */
+
+.pageOverlay{
+  min-height: 100vh;
+  padding: 14px 14px 70px 14px;
+  /* Keep this transparent because the body has the overlay already */
+  background: transparent;
+  color: var(--text);
+}
+
+/* ===============================
+   HUD
+   =============================== */
+
 .hud{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:14px;
   padding:12px 14px;
-  border-radius:14px;
-  background: rgba(255,252,245,0.92);
-  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
 }
 
 .hudLeft{ display:flex; align-items:center; gap:12px; }
 .hudLogo{ width:64px; height:64px; object-fit:contain; }
-.hudTitle{ font-weight:950; font-size:18px; }
-.hudSub{ opacity:0.8; font-weight:700; }
 
-.hudRight{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:flex-end; }
-.hudStat{ padding:8px 10px; border-radius:12px; background: rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.10); }
-.hudLabel{ font-size:12px; opacity:0.75; font-weight:800; }
+.hudTitleBlock{ display:flex; flex-direction:column; gap:2px; }
+.hudTitle{ font-weight:950; font-size:18px; letter-spacing: 0.2px; }
+.hudSub{ opacity:0.8; font-weight:800; font-size: 13px; }
+
+.hudRight{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.hudStat{
+  padding:8px 10px;
+  border-radius:12px;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.10);
+}
+
+.hudLabel{ font-size:12px; opacity:0.75; font-weight:900; }
 .hudValue{ font-weight:950; }
 
 .hudCoins{ display:flex; align-items:center; gap:10px; }
 .coinIcon{ width:26px; height:26px; object-fit:contain; }
 
-/* Grid */
+/* optional: logout button spacing inside hud */
+.hudLogout{ margin-left: 6px; }
+
+/* ===============================
+   GRID / PANELS
+   =============================== */
+
 .grid{
-  margin-top:12px;
-  display:grid;
+  margin-top: 12px;
+  display: grid;
   grid-template-columns: repeat(2, minmax(280px, 1fr));
-  gap:12px;
+  gap: 12px;
 }
+
 @media (max-width: 1000px){
   .grid{ grid-template-columns: 1fr; }
 }
 
-/* Panels */
 .panel{
-  padding:14px;
-  border-radius:14px;
-  background: rgba(255,252,245,0.92);
-  border: 1px solid rgba(0,0,0,0.18);
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
 }
-.panelHeader{ display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap; }
-h2{ margin:0; font-size:16px; font-weight:950; }
-.panelNote{ opacity:0.8; font-weight:700; margin-top:6px; }
-.smallNote{ opacity:0.75; font-size:12px; font-weight:700; margin-top:8px; }
+
+.panelHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+h2{
+  margin:0;
+  font-size:16px;
+  font-weight:950;
+}
+
+.panelNote{
+  opacity:0.85;
+  font-weight:800;
+  margin-top:6px;
+  color: var(--muted);
+}
+
+.smallNote{
+  opacity:0.8;
+  font-size:12px;
+  font-weight:800;
+  margin-top:8px;
+  color: var(--muted);
+}
+
+/* ===============================
+   TABS
+   =============================== */
 
 .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+
 .tabBtn{
-  border:1px solid rgba(0,0,0,0.18);
+  border: 1px solid rgba(0,0,0,0.18);
   background: rgba(255,255,255,0.75);
-  border-radius:999px;
-  padding:8px 10px;
-  font-weight:950;
-  cursor:pointer;
-}
-.tabBtn.active{
-  background: rgba(0,0,0,0.08);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 950;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
 }
 
+.tabBtn:hover{ transform: translateY(-1px); }
+.tabBtn:active{ transform: translateY(0px); }
+
+.tabBtn.active{
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.25);
+}
+
+/* Your existing JS toggles .active, so we keep these */
 .tabContent{ display:none; margin-top:10px; }
 .tabContent.active{ display:block; }
 
+/* ===============================
+   BUTTONS / INPUTS
+   =============================== */
+
 .primaryBtn{
-  margin-top:10px;
-  border:none;
-  border-radius:12px;
-  padding:10px 12px;
-  font-weight:950;
-  cursor:pointer;
-  background:#1b1b1f;
-  color:white;
+  margin-top: 10px;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 950;
+  cursor: pointer;
+  background: var(--btn);
+  color: var(--btnText);
+  transition: transform 120ms ease, filter 120ms ease;
 }
+
+.primaryBtn:hover{ filter: brightness(1.08); transform: translateY(-1px); }
+.primaryBtn:active{ transform: translateY(0px); filter: brightness(1.00); }
+
 .ghostBtn{
-  border:1px solid rgba(0,0,0,0.2);
-  background:transparent;
-  border-radius:12px;
-  padding:10px 12px;
-  font-weight:950;
-  cursor:pointer;
+  border: 1px solid rgba(0,0,0,0.22);
+  background: rgba(255,255,255,0.35);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 950;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
 }
+
+.ghostBtn:hover{ background: rgba(255,255,255,0.55); transform: translateY(-1px); }
+.ghostBtn:active{ transform: translateY(0px); }
 
 .input, .textArea{
-  width:100%;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,0.2);
-  margin-top:10px;
-  font-weight:800;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.22);
+  margin-top: 10px;
+  font-weight: 800;
+  background: rgba(255,255,255,0.85);
+  outline: none;
 }
-.textArea{ min-height:120px; resize:vertical; }
 
-/* Tables */
-.table{ width:100%; border-collapse: collapse; margin-top:10px; }
-.table th, .table td{
-  border-bottom:1px solid rgba(0,0,0,0.12);
-  padding:10px;
-  text-align:left;
+.input:focus, .textArea:focus{
+  border-color: rgba(0,0,0,0.35);
 }
-.table th{ font-size:12px; opacity:0.8; font-weight:950; }
-.teamCell{ display:flex; align-items:center; gap:10px; font-weight:950; }
-.teamLogo{ width:34px; height:34px; object-fit:contain; }
+
+.textArea{ min-height: 120px; resize: vertical; }
+
+/* ===============================
+   TABLES
+   =============================== */
+
+.table{
+  width:100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table th, .table td{
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+  padding: 10px;
+  text-align: left;
+}
+
+.table th{
+  font-size: 12px;
+  opacity: 0.85;
+  font-weight: 950;
+}
+
+.teamCell{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight: 950;
+}
+
+.teamLogo{
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+/* ===============================
+   LITTLE HEADERS
+   =============================== */
 
 .confHeader{ display:flex; align-items:center; gap:10px; margin:8px 0 4px 0; }
 .confLogo{ width:40px; height:40px; object-fit:contain; }
-.confTitle{ font-weight:950; }
+.confTitle{ font-weight: 950; }
 
 .cafeHeader{ display:flex; align-items:center; gap:12px; margin-top:10px; }
 .cafeLogo{ width:46px; height:46px; object-fit:contain; }
 
-/* Ticker */
+/* ===============================
+   TICKER
+   =============================== */
+
 .ticker{
   position: fixed;
   left:0; right:0; bottom:0;
-  height:52px;
-  background: rgba(0,0,0,0.88);
-  color:white;
+  height: 52px;
+  background: rgba(0,0,0,0.90);
+  color: #fff;
   display:flex;
   align-items:center;
   overflow:hidden;
   cursor:pointer;
   border-top: 1px solid rgba(255,255,255,0.15);
+  z-index: 40;
 }
+
 .tickerInner{
   white-space: nowrap;
-  display:inline-block;
-  padding-left:100%;
+  display: inline-block;
+  padding-left: 100%;
   animation: ticker 22s linear infinite;
-  font-weight:950;
+  font-weight: 950;
 }
+
 @keyframes ticker{
   0%{ transform: translateX(0); }
   100%{ transform: translateX(-100%); }
@@ -146,44 +324,55 @@ h2{ margin:0; font-size:16px; font-weight:950; }
 
 .tickerDrawer{
   position: fixed;
-  left:10px; right:10px; bottom:60px;
+  left: 10px; right: 10px; bottom: 60px;
   max-height: 45vh;
-  overflow:auto;
-  padding:12px;
-  border-radius:14px;
-  background: rgba(255,252,245,0.96);
-  border:1px solid rgba(0,0,0,0.2);
+  overflow: auto;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--card-strong);
+  border: 1px solid rgba(0,0,0,0.2);
+  box-shadow: var(--shadow);
+  z-index: 45;
 }
+
 .drawerHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.drawerTitle{ font-weight:950; }
+.drawerTitle{ font-weight: 950; }
+
+/* ===============================
+   MODALS
+   =============================== */
+
 .hidden{ display:none !important; }
 
-/* Modals */
 .modal{
   position: fixed;
-  inset:0;
-  background: rgba(0,0,0,0.55);
+  inset: 0;
+  background: rgba(0,0,0,0.60);
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:14px;
+  padding: 14px;
   z-index: 50;
 }
+
 .modalCard{
-  width:min(520px, 95vw);
-  background: rgba(255,252,245,0.98);
-  border-radius:16px;
-  padding:14px;
-  border:1px solid rgba(0,0,0,0.2);
+  width: min(520px, 95vw);
+  background: var(--card-strong);
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(0,0,0,0.2);
+  box-shadow: var(--shadow);
 }
+
 .modalRow{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
 
 .bigCard{
-  width:min(1100px, 96vw);
-  height:min(680px, 86vh);
-  background: rgba(255,252,245,0.98);
-  border-radius:16px;
-  padding:14px;
-  border:1px solid rgba(0,0,0,0.2);
-  overflow:auto;
+  width: min(1100px, 96vw);
+  height: min(680px, 86vh);
+  background: var(--card-strong);
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(0,0,0,0.2);
+  overflow: auto;
+  box-shadow: var(--shadow);
 }
