@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Underdog Slugging Association</title>
 
-  <!-- ✅ CHANGED: styles.css -> style.css -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -27,7 +26,6 @@
     </div>
 
     <div class="loginActions">
-      <!-- NOTE: ids kept so our JS can hook them easily -->
       <button class="primaryBtn" id="signupBtn">Create Account</button>
       <button class="ghostBtn" id="loginBtn">Login</button>
     </div>
@@ -45,7 +43,9 @@
       <!-- HUD -->
       <header class="hud">
         <div class="hudLeft">
-          <img class="hudLogo" src="assets/logos/league/usa-logo.png" alt="League Logo">
+          <!-- ✅ FIX: .PNG must match GitHub exactly -->
+          <img class="hudLogo" src="./assets/logos/league/usa-logo.PNG" alt="League Logo" />
+
           <div class="hudTitleBlock">
             <div class="hudTitle">Underdog Slugging Association</div>
             <div class="hudSub">Season: <span id="hudSeason">Season 1</span></div>
@@ -59,7 +59,8 @@
           </div>
 
           <div class="hudStat hudCoins">
-            <img class="coinIcon" src="assets/icons/waffle-coin.png" alt="Waffle Coin">
+            <!-- ✅ FIX: change this to .PNG if your file is waffle-coin.PNG on GitHub -->
+            <img class="coinIcon" src="./assets/icons/waffle-coin.PNG" alt="Waffle Coin" />
             <div>
               <div class="hudLabel">Waffle Coins</div>
               <div class="hudValue" id="hudCoins">0</div>
@@ -76,7 +77,6 @@
             <div class="hudValue" id="hudVoteCount">0</div>
           </div>
 
-          <!-- optional logout button (your JS can hook this if you add it) -->
           <button class="ghostBtn hudLogout" id="logoutBtn" type="button">Logout</button>
         </div>
       </header>
@@ -101,7 +101,8 @@
 
           <div class="tabContent" data-tabgroup="standings" data-tab="solar">
             <div class="confHeader">
-              <img class="confLogo" src="assets/logos/conferences/solar.png" alt="Solar">
+              <!-- ✅ change to .PNG if GitHub shows solar.PNG -->
+              <img class="confLogo" src="./assets/logos/conferences/solar.PNG" alt="Solar" />
               <div class="confTitle">Solar Conference</div>
             </div>
             <div id="standingsSolar"></div>
@@ -109,7 +110,8 @@
 
           <div class="tabContent" data-tabgroup="standings" data-tab="lunar">
             <div class="confHeader">
-              <img class="confLogo" src="assets/logos/conferences/lunar.png" alt="Lunar">
+              <!-- ✅ change to .PNG if GitHub shows lunar.PNG -->
+              <img class="confLogo" src="./assets/logos/conferences/lunar.PNG" alt="Lunar" />
               <div class="confTitle">Lunar Conference</div>
             </div>
             <div id="standingsLunar"></div>
@@ -147,7 +149,8 @@
 
           <div class="tabContent" data-tabgroup="right" data-tab="cafe">
             <div class="cafeHeader">
-              <img class="cafeLogo" src="assets/shop/cafe-de-waffles.png" alt="Cafe De Waffles">
+              <!-- change to .PNG if your file is cafe-de-waffles.PNG -->
+              <img class="cafeLogo" src="./assets/shop/cafe-de-waffles.PNG" alt="Cafe De Waffles" />
               <div>
                 <div class="confTitle">Cafe De Waffles</div>
                 <div class="smallNote">Food is stackable up to 10 per item.</div>
@@ -234,9 +237,7 @@
   </div>
 
 
-  <!-- =========================
-       REWARD POPUP (kept)
-       ========================= -->
+  <!-- REWARD POPUP -->
   <div class="modal hidden" id="rewardModal">
     <div class="modalCard">
       <h3>Game Day Results</h3>
@@ -251,77 +252,68 @@
   <div class="modal hidden" id="slotsModal"><div class="bigCard" id="slotsCard"></div></div>
 
 
-  <!-- =========================
-       ✅ NEW: Firebase boot (module) + Auth wiring
-       Keep your existing js/app.js too (we call it after login)
-       ========================= -->
-
+  <!-- Firebase boot + Auth wiring -->
   <script type="module">
-  // (Optional but useful)
-  console.log("✅ auth module loaded");
+    console.log("✅ auth module loaded");
 
-  import { callFn } from "./js/firebase.js";
-  import { signup, login, logout, watchAuth, ensureDailyBonus } from "./js/auth.js";
-  import { initRewardPopup } from "./js/rewards.js";
+    import { callFn } from "./js/firebase.js";
+    import { signup, login, logout, watchAuth, ensureDailyBonus } from "./js/auth.js";
+    import { initRewardPopup } from "./js/rewards.js";
 
-  const loginPanel = document.getElementById("loginPanel");
-  const appRoot = document.getElementById("appRoot");
-  const err = document.getElementById("authError");
+    const loginPanel = document.getElementById("loginPanel");
+    const appRoot = document.getElementById("appRoot");
+    const err = document.getElementById("authError");
 
-  const emailEl = document.getElementById("email");
-  const passEl  = document.getElementById("password");
-  const userEl  = document.getElementById("username");
+    const emailEl = document.getElementById("email");
+    const passEl  = document.getElementById("password");
+    const userEl  = document.getElementById("username");
 
-  document.getElementById("signupBtn").onclick = async () => {
-    err.textContent = "";
-    try {
-      await signup(emailEl.value.trim(), passEl.value.trim(), userEl.value.trim());
-    } catch (e) {
-      err.textContent = e?.message || String(e);
-    }
-  };
+    document.getElementById("signupBtn").onclick = async () => {
+      err.textContent = "";
+      try {
+        await signup(emailEl.value.trim(), passEl.value.trim(), userEl.value.trim());
+      } catch (e) {
+        err.textContent = e?.message || String(e);
+      }
+    };
 
-  document.getElementById("loginBtn").onclick = async () => {
-    err.textContent = "";
-    try {
-      await login(emailEl.value.trim(), passEl.value.trim());
-    } catch (e) {
-      err.textContent = e?.message || String(e);
-    }
-  };
+    document.getElementById("loginBtn").onclick = async () => {
+      err.textContent = "";
+      try {
+        await login(emailEl.value.trim(), passEl.value.trim());
+      } catch (e) {
+        err.textContent = e?.message || String(e);
+      }
+    };
 
-  // logout
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) logoutBtn.onclick = async () => {
-    window.__USA_UID__ = null;
-    await logout();
-  };
-
-  // reward popup watcher
-  initRewardPopup();
-
-  // auth state
-  watchAuth(async (user) => {
-    if (!user) {
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) logoutBtn.onclick = async () => {
       window.__USA_UID__ = null;
-      loginPanel.classList.remove("hidden");
-      appRoot.classList.add("hidden");
-      return;
-    }
+      await logout();
+    };
 
-    window.__USA_UID__ = user.uid;
+    initRewardPopup();
 
-    loginPanel.classList.add("hidden");
-    appRoot.classList.remove("hidden");
+    watchAuth(async (user) => {
+      if (!user) {
+        window.__USA_UID__ = null;
+        loginPanel.classList.remove("hidden");
+        appRoot.classList.add("hidden");
+        return;
+      }
 
-    try { await ensureDailyBonus(user.uid); } catch {}
-    try { await callFn("syncMyResults")({}); } catch {}
-  });
-</script>
+      window.__USA_UID__ = user.uid;
 
+      loginPanel.classList.add("hidden");
+      appRoot.classList.remove("hidden");
 
-  <!-- keep your existing app logic -->
-  <script type="module" src="js/app.js"></script>
+      try { await ensureDailyBonus(user.uid); } catch {}
+      try { await callFn("syncMyResults")({}); } catch {}
+    });
+  </script>
+
+  <!-- App logic -->
+  <script type="module" src="./js/app.js"></script>
 
 </body>
 </html>
