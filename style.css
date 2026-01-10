@@ -5,93 +5,64 @@
 *{ box-sizing:border-box; }
 
 :root{
-  /* Readability + shape */
-  --card: rgba(255,252,245,0.88);          /* panels/hud */
-  --card-strong: rgba(255,252,245,0.94);   /* modals/drawers */
-  --stroke: rgba(0,0,0,0.38);              /* stronger outline */
-  --stroke-soft: rgba(0,0,0,0.18);
-
-  --text: #0e1116;
-  --muted: rgba(0,0,0,0.72);
-
+  /* MAIN LOOK */
   --radius: 14px;
-  --shadow: 0 14px 34px rgba(0,0,0,0.24);
+  --shadow: 0 14px 34px rgba(0,0,0,0.22);
 
+  /* Text */
+  --text: #0f1116;
+  --muted: rgba(0,0,0,0.70);
+
+  /* Button */
   --btn: #14161d;
   --btnText: #ffffff;
+
+  /* Outlines */
+  --stroke: rgba(255, 214, 102, 0.45);     /* gold-ish outline */
+  --stroke-soft: rgba(15, 40, 90, 0.28);   /* deep blue outline */
+
+  /* OVERLAYS: gold -> deep blue gradient (semi-transparent) */
+  --overlay-grad: linear-gradient(
+    135deg,
+    rgba(255, 212, 95, 0.22) 0%,
+    rgba(18, 44, 110, 0.26) 55%,
+    rgba(8, 16, 32, 0.22) 100%
+  );
+
+  /* Stronger version for modals/drawer (still not “solid”) */
+  --overlay-grad-strong: linear-gradient(
+    135deg,
+    rgba(255, 212, 95, 0.30) 0%,
+    rgba(18, 44, 110, 0.34) 55%,
+    rgba(8, 16, 32, 0.30) 100%
+  );
 }
 
-/* Full-page background that covers the entire scroll height */
-html, body{ min-height:100%; }
+/* Make the background fill the whole scrollable page */
+html, body{ min-height: 100%; }
 
 body{
   margin:0;
   font-family: system-ui, Arial, sans-serif;
   color: var(--text);
 
-  /* Fallback */
+  /* ✅ USA BACKGROUND IMAGE */
+  background-image: url("assets/backgrounds/usa-bg.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+
+  /* ✅ keeps it “attached” while you scroll */
+  background-attachment: fixed;
+
+  /* fallback color behind the image */
   background-color:#0b1020;
+}
 
-  /* Layered background:
-     1) stars (tiny dots)
-     2) soft night glow
-     3) sun rays
-     4) sunset/night split gradient
-  */
-  background-image:
-    radial-gradient(circle at 20% 25%, rgba(255,255,255,0.9) 1px, transparent 1.5px),
-    radial-gradient(circle at 70% 18%, rgba(255,255,255,0.8) 1px, transparent 1.5px),
-    radial-gradient(circle at 45% 40%, rgba(255,255,255,0.7) 1px, transparent 1.5px),
-    radial-gradient(circle at 85% 55%, rgba(255,255,255,0.75) 1px, transparent 1.5px),
-    radial-gradient(circle at 60% 75%, rgba(255,255,255,0.65) 1px, transparent 1.5px),
-    radial-gradient(circle at 30% 65%, rgba(255,255,255,0.7) 1px, transparent 1.5px),
-
-    radial-gradient(circle at 75% 30%, rgba(90,140,255,0.18), transparent 55%),
-
-    repeating-conic-gradient(
-      from -20deg at 18% 35%,
-      rgba(255, 230, 160, 0.22) 0deg 10deg,
-      rgba(255, 230, 160, 0.00) 10deg 20deg
-    ),
-
-    linear-gradient(
-      90deg,
-      #ffb24a 0%,
-      #ffd06a 28%,
-      #2a2f63 55%,
-      #0b1020 100%
-    );
-
-  background-size:
-    220px 220px,
-    260px 260px,
-    240px 240px,
-    300px 300px,
-    280px 280px,
-    320px 320px,
-    1200px 900px,
-    1400px 1400px,
-    cover;
-
-  background-repeat:
-    repeat, repeat, repeat, repeat, repeat, repeat,
-    no-repeat, no-repeat, no-repeat;
-
-  background-position:
-    0 0,
-    40px 80px,
-    120px 40px,
-    160px 140px,
-    80px 180px,
-    200px 220px,
-    center,
-    center,
-    center;
-
-  /* Key: doesn't “end” on scroll */
-  background-attachment:
-    scroll, scroll, scroll, scroll, scroll, scroll,
-    scroll, scroll, fixed;
+/* On iOS, background-attachment: fixed is unreliable.
+   This prevents “disappearing” and keeps it nice. */
+@supports (-webkit-touch-callout: none){
+  body{ background-attachment: scroll; }
 }
 
 /* ===============================
@@ -118,19 +89,20 @@ body{
   padding:12px 14px;
   border-radius: var(--radius);
 
-  background: var(--card);
+  /* ✅ gradient overlay look */
+  background: var(--overlay-grad);
   border: 2px solid var(--stroke);
   box-shadow: var(--shadow);
 
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 
 .hudLeft{ display:flex; align-items:center; gap:12px; }
 .hudLogo{ width:112px; height:112px; object-fit:contain; }
 
 .hudTitleBlock{ display:flex; flex-direction:column; gap:2px; }
-.hudTitle{ font-weight:950; font-size:18px; letter-spacing:0.2px; }
-.hudSub{ opacity:0.85; font-weight:800; font-size:13px; color: var(--muted); }
+.hudTitle{ font-weight:950; font-size:18px; letter-spacing:0.2px; color: rgba(255,255,255,0.95); }
+.hudSub{ opacity:0.9; font-weight:800; font-size:13px; color: rgba(255,255,255,0.78); }
 
 .hudRight{
   display:flex;
@@ -140,15 +112,16 @@ body{
   justify-content:flex-end;
 }
 
+/* little stat chips */
 .hudStat{
   padding:8px 10px;
   border-radius:12px;
-  background: rgba(255,255,255,0.55);
-  border: 1px solid var(--stroke-soft);
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255, 214, 102, 0.35);
 }
 
-.hudLabel{ font-size:12px; opacity:0.85; font-weight:900; color: var(--muted); }
-.hudValue{ font-weight:950; }
+.hudLabel{ font-size:12px; font-weight:900; color: rgba(255,255,255,0.78); }
+.hudValue{ font-weight:950; color: rgba(255,255,255,0.95); }
 
 .hudCoins{ display:flex; align-items:center; gap:10px; }
 .coinIcon{ width:32px; height:32px; object-fit:contain; }
@@ -173,11 +146,12 @@ body{
   padding:14px;
   border-radius: var(--radius);
 
-  background: var(--card);
+  /* ✅ gradient overlay look */
+  background: var(--overlay-grad);
   border: 2px solid var(--stroke);
   box-shadow: var(--shadow);
 
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 
 .panelHeader{
@@ -188,19 +162,24 @@ body{
   flex-wrap:wrap;
 }
 
-h2{ margin:0; font-size:16px; font-weight:950; }
+h2{
+  margin:0;
+  font-size:16px;
+  font-weight:950;
+  color: rgba(255,255,255,0.95);
+}
 
 .panelNote{
   margin-top:6px;
   font-weight:800;
-  color: var(--muted);
+  color: rgba(255,255,255,0.78);
 }
 
 .smallNote{
   margin-top:8px;
   font-size:12px;
   font-weight:800;
-  color: var(--muted);
+  color: rgba(255,255,255,0.70);
 }
 
 /* ===============================
@@ -210,8 +189,9 @@ h2{ margin:0; font-size:16px; font-weight:950; }
 .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
 
 .tabBtn{
-  border: 2px solid rgba(0,0,0,0.22);
-  background: rgba(255,255,255,0.72);
+  border: 2px solid rgba(255,214,102,0.35);
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.92);
   border-radius: 999px;
   padding: 8px 10px;
   font-weight: 950;
@@ -220,13 +200,16 @@ h2{ margin:0; font-size:16px; font-weight:950; }
   transition: background 120ms ease, border-color 120ms ease;
 }
 
-/* IMPORTANT: remove the "jump" on hover */
-.tabBtn:hover{ background: rgba(255,255,255,0.90); }
+/* no hover jump */
+.tabBtn:hover{
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,214,102,0.50);
+}
 .tabBtn:active{ filter: brightness(0.98); }
 
 .tabBtn.active{
-  background: rgba(20,22,29,0.10);
-  border-color: rgba(0,0,0,0.40);
+  background: rgba(255,214,102,0.16);
+  border-color: rgba(255,214,102,0.70);
 }
 
 .tabContent{ display:none; margin-top:10px; }
@@ -245,36 +228,41 @@ h2{ margin:0; font-size:16px; font-weight:950; }
   cursor:pointer;
   background: var(--btn);
   color: var(--btnText);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.20);
 }
 
 .primaryBtn:hover{ filter: brightness(1.06); }
 .primaryBtn:active{ filter: brightness(0.98); }
 
 .ghostBtn{
-  border: 2px solid rgba(0,0,0,0.22);
-  background: rgba(255,255,255,0.55);
+  border: 2px solid rgba(255,214,102,0.35);
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.92);
   border-radius:12px;
   padding:10px 12px;
   font-weight:950;
   cursor:pointer;
 }
 
-.ghostBtn:hover{ background: rgba(255,255,255,0.75); }
+.ghostBtn:hover{ background: rgba(255,255,255,0.18); }
 .ghostBtn:active{ filter: brightness(0.98); }
 
 .input, .textArea{
   width:100%;
   padding:10px 12px;
   border-radius:12px;
-  border:2px solid rgba(0,0,0,0.22);
+  border:2px solid rgba(255,214,102,0.30);
   margin-top:10px;
   font-weight:800;
-  background: rgba(255,255,255,0.92);
+
+  /* readable but still “overlay” */
+  background: rgba(255,255,255,0.85);
+  color: #0f1116;
+
   outline:none;
 }
 .input:focus, .textArea:focus{
-  border-color: rgba(0,0,0,0.40);
+  border-color: rgba(255,214,102,0.65);
 }
 .textArea{ min-height:120px; resize:vertical; }
 
@@ -286,19 +274,23 @@ h2{ margin:0; font-size:16px; font-weight:950; }
   width:100%;
   border-collapse: collapse;
   margin-top:10px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .table th, .table td{
-  border-bottom: 1px solid rgba(0,0,0,0.16);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
   padding:10px;
   text-align:left;
+  color: rgba(255,255,255,0.92);
 }
 
 .table th{
   font-size:12px;
-  opacity:0.9;
   font-weight:950;
-  color: var(--muted);
+  color: rgba(255,255,255,0.78);
+  background: rgba(0,0,0,0.18);
 }
 
 .teamCell{ display:flex; align-items:center; gap:10px; font-weight:950; }
@@ -310,7 +302,7 @@ h2{ margin:0; font-size:16px; font-weight:950; }
 
 .confHeader{ display:flex; align-items:center; gap:10px; margin:8px 0 4px 0; }
 .confLogo{ width:90px; height:90px; object-fit:contain; }
-.confTitle{ font-weight:950; }
+.confTitle{ font-weight:950; color: rgba(255,255,255,0.95); }
 
 .cafeHeader{ display:flex; align-items:center; gap:12px; margin-top:10px; }
 .cafeLogo{ width:46px; height:46px; object-fit:contain; }
@@ -352,14 +344,17 @@ h2{ margin:0; font-size:16px; font-weight:950; }
   overflow:auto;
   padding:12px;
   border-radius: var(--radius);
-  background: var(--card-strong);
-  border: 2px solid var(--stroke);
+
+  background: var(--overlay-grad-strong);
+  border: 2px solid rgba(255,214,102,0.55);
   box-shadow: var(--shadow);
+
+  backdrop-filter: blur(12px);
   z-index:45;
 }
 
 .drawerHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.drawerTitle{ font-weight:950; }
+.drawerTitle{ font-weight:950; color: rgba(255,255,255,0.95); }
 
 /* ===============================
    MODALS
@@ -380,11 +375,15 @@ h2{ margin:0; font-size:16px; font-weight:950; }
 
 .modalCard{
   width: min(520px, 95vw);
-  background: var(--card-strong);
   border-radius: 16px;
   padding:14px;
-  border: 2px solid var(--stroke);
+
+  background: var(--overlay-grad-strong);
+  border: 2px solid rgba(255,214,102,0.55);
   box-shadow: var(--shadow);
+
+  backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.92);
 }
 
 .modalRow{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
@@ -392,10 +391,14 @@ h2{ margin:0; font-size:16px; font-weight:950; }
 .bigCard{
   width: min(1100px, 96vw);
   height: min(680px, 86vh);
-  background: var(--card-strong);
   border-radius: 16px;
   padding:14px;
-  border: 2px solid var(--stroke);
+
+  background: var(--overlay-grad-strong);
+  border: 2px solid rgba(255,214,102,0.55);
   overflow:auto;
   box-shadow: var(--shadow);
+
+  backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.92);
 }
