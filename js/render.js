@@ -91,8 +91,6 @@ export function renderLeaders(data){
     hr: ["homeruns", "HR"],
     runs: ["runs", "Runs"],
     rbi: ["rbis", "RBI"],
-    bavg: ["battingAvg", "BAVG"],
-    mvp: ["mvps", "MVP"],
     so: ["strikeouts", "SO"]
   };
 

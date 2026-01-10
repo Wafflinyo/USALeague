@@ -43,7 +43,7 @@
       <!-- HUD -->
       <header class="hud">
         <div class="hudLeft">
-          <!-- ✅ FIX: .PNG must match GitHub exactly -->
+          <!-- NOTE: Make this extension match GitHub EXACTLY (.png vs .PNG) -->
           <img class="hudLogo" src="./assets/logos/league/usa-logo.PNG" alt="League Logo" />
 
           <div class="hudTitleBlock">
@@ -59,7 +59,7 @@
           </div>
 
           <div class="hudStat hudCoins">
-            <!-- ✅ FIX: change this to .PNG if your file is waffle-coin.PNG on GitHub -->
+            <!-- NOTE: Make this extension match GitHub EXACTLY (.png vs .PNG) -->
             <img class="coinIcon" src="./assets/icons/waffle-coin.PNG" alt="Waffle Coin" />
             <div>
               <div class="hudLabel">Waffle Coins</div>
@@ -84,7 +84,7 @@
       <!-- MAIN GRID -->
       <main class="grid">
 
-        <!-- STANDINGS OVERLAY -->
+        <!-- STANDINGS -->
         <section class="panel">
           <div class="panelHeader">
             <h2>Standings</h2>
@@ -101,7 +101,6 @@
 
           <div class="tabContent" data-tabgroup="standings" data-tab="solar">
             <div class="confHeader">
-              <!-- ✅ change to .PNG if GitHub shows solar.png -->
               <img class="confLogo" src="./assets/logos/conferences/solar.png" alt="Solar" />
               <div class="confTitle">Solar Conference</div>
             </div>
@@ -110,7 +109,6 @@
 
           <div class="tabContent" data-tabgroup="standings" data-tab="lunar">
             <div class="confHeader">
-              <!-- ✅ change to .PNG if GitHub shows lunar.png -->
               <img class="confLogo" src="./assets/logos/conferences/lunar.png" alt="Lunar" />
               <div class="confTitle">Lunar Conference</div>
             </div>
@@ -118,7 +116,7 @@
           </div>
         </section>
 
-        <!-- VOTING + SHOP + COLLECTION -->
+        <!-- VOTING + SHOP + COLLECTION (✅ Cafe removed) -->
         <section class="panel">
           <div class="panelHeader">
             <h2>Voting & Shops</h2>
@@ -126,7 +124,6 @@
               <button class="tabBtn active" data-tabgroup="right" data-tab="voting">Voting</button>
               <button class="tabBtn" data-tabgroup="right" data-tab="giftshop">Mask’s Gift Shop</button>
               <button class="tabBtn" data-tabgroup="right" data-tab="collection">Collection</button>
-              <button class="tabBtn" data-tabgroup="right" data-tab="cafe">Cafe De Waffles</button>
             </div>
           </div>
 
@@ -146,21 +143,9 @@
             <button class="primaryBtn" id="openCollectionBtn">Open Collection</button>
             <div class="smallNote">Recently obtained items glow with a gold trim.</div>
           </div>
-
-          <div class="tabContent" data-tabgroup="right" data-tab="cafe">
-            <div class="cafeHeader">
-              <!-- change to .PNG if your file is cafe-de-waffles.PNG -->
-              <img class="cafeLogo" src="./assets/shop/cafe-de-waffles.PNG" alt="Cafe De Waffles" />
-              <div>
-                <div class="confTitle">Cafe De Waffles</div>
-                <div class="smallNote">Food is stackable up to 10 per item.</div>
-              </div>
-            </div>
-            <div id="cafeMenu"></div>
-          </div>
         </section>
 
-        <!-- LEAGUE LEADERS -->
+        <!-- LEAGUE LEADERS (✅ BAVG + MVP removed) -->
         <section class="panel">
           <div class="panelHeader">
             <h2>League Leaders</h2>
@@ -168,8 +153,6 @@
               <button class="tabBtn active" data-tabgroup="leaders" data-tab="hr">HR</button>
               <button class="tabBtn" data-tabgroup="leaders" data-tab="runs">Runs</button>
               <button class="tabBtn" data-tabgroup="leaders" data-tab="rbi">RBI</button>
-              <button class="tabBtn" data-tabgroup="leaders" data-tab="bavg">BAVG</button>
-              <button class="tabBtn" data-tabgroup="leaders" data-tab="mvp">MVP</button>
               <button class="tabBtn" data-tabgroup="leaders" data-tab="so">SO</button>
             </div>
           </div>

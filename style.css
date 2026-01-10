@@ -338,7 +338,7 @@ h2{
   white-space:nowrap;
   display:inline-block;
   padding-left:100%;
-  animation: ticker 85s linear infinite;
+  animation: ticker 95s linear infinite;
   font-weight:950;
 }
 @keyframes ticker{
