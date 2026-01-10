@@ -257,67 +257,68 @@
        ========================= -->
 
   <script type="module">
-    import { callFn } from "./js/firebase.js";
-    import { signup, login, logout, watchAuth, ensureDailyBonus } from "./js/auth.js";
-    import { initRewardPopup } from "./js/rewards.js";
-    import { callFn } from "./js/firebase.js";
+  // (Optional but useful)
+  console.log("✅ auth module loaded");
 
-    const loginPanel = document.getElementById("loginPanel");
-    const appRoot = document.getElementById("appRoot");
-    const err = document.getElementById("authError");
+  import { callFn } from "./js/firebase.js";
+  import { signup, login, logout, watchAuth, ensureDailyBonus } from "./js/auth.js";
+  import { initRewardPopup } from "./js/rewards.js";
 
-    const emailEl = document.getElementById("email");
-    const passEl  = document.getElementById("password");
-    const userEl  = document.getElementById("username");
+  const loginPanel = document.getElementById("loginPanel");
+  const appRoot = document.getElementById("appRoot");
+  const err = document.getElementById("authError");
 
-    // buttons
-    document.getElementById("signupBtn").onclick = async () => {
-      err.textContent = "";
-      try {
-        await signup(emailEl.value.trim(), passEl.value.trim(), userEl.value.trim());
-      } catch (e) {
-        err.textContent = e?.message || String(e);
-      }
-    };
+  const emailEl = document.getElementById("email");
+  const passEl  = document.getElementById("password");
+  const userEl  = document.getElementById("username");
 
-    document.getElementById("loginBtn").onclick = async () => {
-      err.textContent = "";
-      try {
-        await login(emailEl.value.trim(), passEl.value.trim());
-      } catch (e) {
-        err.textContent = e?.message || String(e);
-      }
-    };
+  document.getElementById("signupBtn").onclick = async () => {
+    err.textContent = "";
+    try {
+      await signup(emailEl.value.trim(), passEl.value.trim(), userEl.value.trim());
+    } catch (e) {
+      err.textContent = e?.message || String(e);
+    }
+  };
 
-    // optional logout (if your app.js wants to control it, it can also hook it)
-    // optional logout
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) logoutBtn.onclick = async () => {
-      window.__USA_UID__ = null;
-      await logout();
-    };
+  document.getElementById("loginBtn").onclick = async () => {
+    err.textContent = "";
+    try {
+      await login(emailEl.value.trim(), passEl.value.trim());
+    } catch (e) {
+      err.textContent = e?.message || String(e);
+    }
+  };
 
-    // reward popup watcher
-      initRewardPopup();
+  // logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) logoutBtn.onclick = async () => {
+    window.__USA_UID__ = null;
+    await logout();
+  };
 
-    watchAuth(async (user) => {
-      if (!user) {
+  // reward popup watcher
+  initRewardPopup();
+
+  // auth state
+  watchAuth(async (user) => {
+    if (!user) {
       window.__USA_UID__ = null;
       loginPanel.classList.remove("hidden");
       appRoot.classList.add("hidden");
       return;
     }
 
-  window.__USA_UID__ = user.uid; // set ASAP
+    window.__USA_UID__ = user.uid;
 
-  loginPanel.classList.add("hidden");
-  appRoot.classList.remove("hidden");
+    loginPanel.classList.add("hidden");
+    appRoot.classList.remove("hidden");
 
-  try { await ensureDailyBonus(user.uid); } catch {}
-  try { await callFn("syncMyResults")({}); } catch {}
-});
+    try { await ensureDailyBonus(user.uid); } catch {}
+    try { await callFn("syncMyResults")({}); } catch {}
+  });
+</script>
 
-  </script>
 
   <!-- keep your existing app logic -->
   <script type="module" src="js/app.js"></script>
