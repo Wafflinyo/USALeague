@@ -25,30 +25,98 @@
   --btnText: #ffffff;
 }
 
+/* Full-page background that covers the entire scroll height */
 html, body{
-  margin:0;
-  padding:0;
-  height:100%;
-  font-family: system-ui, Arial, sans-serif;
-  color: var(--text);
-  background: var(--bg-color);
+  min-height: 100%;
 }
 
-/* Optional background image toggle.
-   To enable image background:
-   set --bg-use-image: 1 in :root
-*/
 body{
-  background:
-    linear-gradient(var(--overlay), var(--overlay)),
-    /* this image layer only “shows” when you set --bg-use-image: 1 */
-    /* (if you keep it 0, the image layer is still there but overlay + fallback makes it effectively invisible) */
-    var(--bg-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  margin: 0;
+
+  /* Base colors (optional fallback) */
+  background-color: #0b1020;
+
+  /* Layered background:
+     1) stars (tiny dots)
+     2) soft night glow
+     3) sun rays
+     4) sunset/night split gradient
+  */
+  background-image:
+    /* Stars */
+    radial-gradient(circle at 20% 25%, rgba(255,255,255,0.9) 1px, transparent 1.5px),
+    radial-gradient(circle at 70% 18%, rgba(255,255,255,0.8) 1px, transparent 1.5px),
+    radial-gradient(circle at 45% 40%, rgba(255,255,255,0.7) 1px, transparent 1.5px),
+    radial-gradient(circle at 85% 55%, rgba(255,255,255,0.75) 1px, transparent 1.5px),
+    radial-gradient(circle at 60% 75%, rgba(255,255,255,0.65) 1px, transparent 1.5px),
+    radial-gradient(circle at 30% 65%, rgba(255,255,255,0.7) 1px, transparent 1.5px),
+
+    /* Subtle night glow */
+    radial-gradient(circle at 75% 30%, rgba(90,140,255,0.18), transparent 55%),
+
+    /* Sun rays (fan from left side) */
+    repeating-conic-gradient(
+      from -20deg at 18% 35%,
+      rgba(255, 230, 160, 0.22) 0deg 10deg,
+      rgba(255, 230, 160, 0.00) 10deg 20deg
+    ),
+
+    /* Sunset (left) -> Night (right) split */
+    linear-gradient(
+      90deg,
+      #ffb24a 0%,
+      #ffd06a 28%,
+      #2a2f63 55%,
+      #0b1020 100%
+    );
+
+  /* Make the pattern repeat vertically so it never “ends” */
+  background-size:
+    220px 220px, /* stars */
+    260px 260px,
+    240px 240px,
+    300px 300px,
+    280px 280px,
+    320px 320px,
+    1200px 900px, /* night glow */
+    1400px 1400px, /* rays */
+    cover;          /* main gradient */
+
+  background-repeat:
+    repeat,
+    repeat,
+    repeat,
+    repeat,
+    repeat,
+    repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat;
+
+  background-position:
+    0 0,
+    40px 80px,
+    120px 40px,
+    160px 140px,
+    80px 180px,
+    200px 220px,
+    center,
+    center,
+    center;
+
+  /* KEY: keeps it stable while scrolling */
+  background-attachment:
+    scroll,
+    scroll,
+    scroll,
+    scroll,
+    scroll,
+    scroll,
+    scroll,
+    scroll,
+    fixed;
 }
+
 
 /* If you want a PURE solid background (no image at all),
    delete the background-image lines above and keep just:
