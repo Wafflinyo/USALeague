@@ -5,52 +5,81 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function isMe(uid) { return signedIn() && request.auth.uid == uid; }
 
-    // Public-ish user data (for prediction leaderboard)
+    // ----------------------------
+    // USERS (profile + collection)
+    // ----------------------------
     match /users/{uid} {
+      // Needed for prediction leaderboard + HUD
       allow read: if signedIn();
 
-      // Users can only set username from client.
-      // Coins, vote stats, slots streak, etc are server-only via Functions.
+      // Create profile doc on signup (client)
       allow create: if isMe(uid);
+
+      // Client is ONLY allowed to change username
       allow update: if isMe(uid)
         && request.resource.data.diff(resource.data).changedKeys().hasOnly(["username"]);
+
       allow delete: if false;
 
-      // Inventory: user can read their own, but only Functions can write
+      // User inventory: user can read; ONLY Functions can write
       match /collection/{itemId} {
         allow read: if isMe(uid);
         allow write: if false;
       }
     }
 
-    // Votes: user can write their own vote doc; lock + payouts enforced in Functions
+    // ----------------------------
+    // VOTING (client submits picks)
+    // ----------------------------
     match /seasons/{seasonId}/gameDays/{date}/votes/{uid} {
       allow read: if isMe(uid);
-      allow write: if isMe(uid);
+      allow write: if isMe(uid); // locking + payouts enforced by Cloud Functions
     }
 
-    // Reward popups: user can read theirs; only Functions write/mark
+    // ----------------------------
+    // REWARD POPUPS (function creates, user reads)
+    // ----------------------------
     match /rewardPopups/{docId} {
       allow read: if signedIn() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
 
-    // Announcements (jackpot etc): signed-in users can read; Functions write
+    // ----------------------------
+    // ANNOUNCEMENTS (jackpots etc)
+    // ----------------------------
     match /announcements/{id} {
       allow read: if signedIn();
       allow write: if false;
     }
 
-    // Shop catalog: signed-in users can read; only you should edit in console
+    // ----------------------------
+    // SHOP CATALOG (you edit in console)
+    // ----------------------------
     match /shopItems/{id} {
       allow read: if signedIn();
       allow write: if false;
     }
 
-    // Suggestions: only Functions handle (1/day)
+    // Sale metadata (client reads, function writes)
+    match /shopMeta/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // ----------------------------
+    // SUGGESTIONS (function-only)
+    // ----------------------------
     match /suggestions/{id} {
       allow read: if false;
       allow write: if false;
     }
+
+    // ----------------------------
+    // DEFAULT DENY (everything else)
+    // ----------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
+

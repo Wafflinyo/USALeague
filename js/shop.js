@@ -1,218 +1,267 @@
+// js/shop.js
 import { db } from "./firebase.js";
 import {
-  collection, getDocs, doc, getDoc
+  collection, doc, getDoc, getDocs, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
   getFunctions, httpsCallable
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-const functions = getFunctions();
-const buyShopItem = httpsCallable(functions, "buyShopItem");
+import { SHOP_ITEMS } from "./shopData.js";
 
-const el = (id) => document.getElementById(id);
-const uid = () => window.__USA_UID__ || null;
+const $ = (id) => document.getElementById(id);
 
-function openModal(id){ el(id)?.classList.remove("hidden"); }
-function closeModal(id){ el(id)?.classList.add("hidden"); }
-
-function rarityLabel(r){
-  if (!r) return "";
-  if (r === "usa") return "USA Merch";
-  return r.toUpperCase();
+function requireUid() {
+  const uid = window.__USA_UID__ || null;
+  if (!uid) throw new Error("You must be logged in.");
+  return uid;
 }
 
-function sortShopItems(a,b){
-  const order = { usa:0, legendary:1, epic:2, rare:3, uncommon:4, common:5 };
-  return (order[a.rarity] ?? 99) - (order[b.rarity] ?? 99);
+function rarityLabel(r) {
+  return (r || "common").toUpperCase();
 }
 
-async function loadShopItems(){
+function priceAfterDiscount(basePrice, disc) {
+  const d = Math.max(0, Math.min(Number(disc || 0), 0.25));
+  return Math.max(1, Math.round(Number(basePrice) * (1 - d)));
+}
+
+/**
+ * One-time helper you can run to create/update shopItems docs from SHOP_ITEMS array.
+ * You’ll click a "Seed Shop" button we’ll add to the modal.
+ */
+async function seedShopItems() {
+  // This writes from client. Your rules currently deny shopItems writes.
+  // So you have 2 options:
+  // (A) manually create items in console (you already did),
+  // (B) temporarily allow shopItems write for yourself.
+  // For now, we just show you the data in console.
+  console.log("SHOP_ITEMS to create in Firestore:", SHOP_ITEMS);
+  alert("Seed helper: check console for SHOP_ITEMS list. Create/update those docs in Firestore.");
+}
+
+async function loadShopItemsFromFirestore() {
   const snap = await getDocs(collection(db, "shopItems"));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort(sortShopItems);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-async function loadSale(){
-  const snap = await getDoc(doc(db, "shopMeta", "currentSale"));
-  if (!snap.exists()) return { discounts: {}, label: "No Sale Today" };
-  return snap.data();
+async function loadSale() {
+  const saleSnap = await getDoc(doc(db, "shopMeta", "currentSale"));
+  if (!saleSnap.exists()) return { discounts: {}, label: "No Sale Today" };
+  const data = saleSnap.data();
+  return {
+    discounts: data.discounts || {},
+    label: data.label || "Daily Sale",
+    dayKey: data.dayKey || null
+  };
 }
 
-function priceWithSale(base, disc){
-  const d = Math.max(0, Math.min(0.25, Number(disc || 0)));
-  return Math.max(1, Math.round(Number(base || 0) * (1 - d)));
-}
-
-function renderShopGrid(items, sale){
-  const discounts = sale?.discounts || {};
-  return `
-    <div class="shopGrid">
-      ${items.map(it => {
-        const disc = discounts[it.id] || 0;
-        const finalPrice = priceWithSale(it.basePrice, disc);
-        const onSale = disc > 0;
-
-        return `
-          <button class="shopItemCard ${it.rarity || "common"}" data-item="${it.id}">
-            <img class="shopIcon" src="${it.icon}" alt="${it.name}">
-            <div class="shopNameRow">
-              <div class="shopItemName">${it.name}</div>
-              ${onSale ? `<div class="saleBadge">-${Math.round(disc*100)}%</div>` : ``}
-            </div>
-            <div class="shopItemMeta">${rarityLabel(it.rarity)} • ${onSale ? `<s>${it.basePrice}</s> ` : ``}<b>${finalPrice}</b> 🧇</div>
-          </button>
-        `;
-      }).join("")}
-    </div>
-  `;
-}
-
-function renderDetails(it, sale){
-  const disc = (sale?.discounts || {})[it.id] || 0;
-  const finalPrice = priceWithSale(it.basePrice, disc);
-  const onSale = disc > 0;
-
-  return `
-    <div class="shopDetails">
-      <img class="shopDetailsImg" src="${it.icon}" alt="${it.name}">
-      <div class="shopDetailsTitle">${it.name}</div>
-      <div class="shopDetailsRarity">${rarityLabel(it.rarity)}</div>
-      <div class="shopDetailsDesc">${it.desc || ""}</div>
-
-      <div class="shopDetailsPrice">
-        ${onSale ? `<div>Was: <s>${it.basePrice}</s> 🧇</div>` : ``}
-        <div>Price: <b>${finalPrice}</b> 🧇 ${onSale ? `(Sale -${Math.round(disc*100)}%)` : ``}</div>
-      </div>
-
-      <button class="primaryBtn" id="buyBtn">Buy</button>
-      <div class="smallNote" id="shopMsg"></div>
-    </div>
-  `;
-}
-
-async function renderGiftShop(){
-  const card = el("giftShopCard");
+function renderShopModal({ items, sale, onSelect, selectedId }) {
+  const card = $("giftShopCard");
   if (!card) return;
 
-  card.innerHTML = `
-    <div class="bigHeader">
-      <div>
-        <div class="bigTitle">Mask’s Gift Shop</div>
-        <div class="smallNote" id="saleNote">Loading sale...</div>
+  const selected = items.find(x => x.id === selectedId) || null;
+
+  const gridHtml = items.map(it => {
+    const disc = sale.discounts?.[it.id] || 0;
+    const base = Number(it.basePrice || 0);
+    const finalP = priceAfterDiscount(base, disc);
+    const onSale = disc > 0;
+
+    return `
+      <button class="shopTile ${selectedId === it.id ? "active" : ""}" data-item="${it.id}">
+        <img class="shopIcon" src="${it.icon}" alt="${it.name}">
+        <div class="shopTileName">${it.name}</div>
+        <div class="shopTileMeta">
+          <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
+          <span class="price">${onSale ? `<s>${base}</s> ${finalP}` : `${base}`}</span>
+        </div>
+      </button>
+    `;
+  }).join("");
+
+  const detailHtml = selected ? (() => {
+    const disc = sale.discounts?.[selected.id] || 0;
+    const base = Number(selected.basePrice || 0);
+    const finalP = priceAfterDiscount(base, disc);
+    const onSale = disc > 0;
+    const stack = selected.stackable ? `Stackable (max ${selected.maxStack || 10})` : "Not stackable";
+
+    return `
+      <div class="shopDetail">
+        <div class="shopDetailTop">
+          <img class="shopDetailIcon" src="${selected.icon}" alt="${selected.name}">
+          <div>
+            <div class="shopDetailName">${selected.name}</div>
+            <div class="shopDetailTags">
+              <span class="rarity ${selected.rarity || "common"}">${rarityLabel(selected.rarity)}</span>
+              <span class="stack">${stack}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shopDetailDesc">${selected.desc || ""}</div>
+
+        <div class="shopDetailPrice">
+          ${onSale
+            ? `<div>Price: <s>${base}</s> <b>${finalP}</b> (-${Math.round(disc * 100)}%)</div>`
+            : `<div>Price: <b>${base}</b></div>`
+          }
+        </div>
+
+        <button class="primaryBtn" id="buyItemBtn">Buy</button>
+        <div class="smallNote" id="buyMsg"></div>
       </div>
-      <button class="ghostBtn" id="closeGift">Close</button>
+    `;
+  })() : `
+    <div class="shopDetail">
+      <div class="smallNote">Select an item to view details.</div>
+    </div>
+  `;
+
+  card.innerHTML = `
+    <div class="bigHeaderRow">
+      <div>
+        <div style="font-weight:950;font-size:18px;">Mask’s Gift Shop</div>
+        <div class="smallNote">${sale.label || "Sale"} ${sale.dayKey ? `• ${sale.dayKey}` : ""}</div>
+      </div>
+      <div class="bigHeaderBtns">
+        <button class="ghostBtn" id="seedShopBtn">Seed Helper</button>
+        <button class="ghostBtn" id="closeGiftShopBtn">Close</button>
+      </div>
     </div>
 
     <div class="shopLayout">
-      <div class="shopLeft">
-        <div id="shopGridWrap"></div>
-      </div>
-      <div class="shopRight">
-        <div class="shopSectionTitle">Item Preview</div>
-        <div id="detailsPane" class="shopDetailsEmpty">Select an item.</div>
-      </div>
+      <div class="shopGrid">${gridHtml}</div>
+      ${detailHtml}
     </div>
   `;
 
-  card.querySelector("#closeGift")?.addEventListener("click", () => closeModal("giftShopModal"));
+  // wire buttons
+  $("closeGiftShopBtn")?.addEventListener("click", () => $("giftShopModal")?.classList.add("hidden"));
+  $("seedShopBtn")?.addEventListener("click", seedShopItems);
 
-  const [items, sale] = await Promise.all([loadShopItems(), loadSale()]);
-  card.querySelector("#saleNote").textContent =
-    `${sale.label || "Daily Sale"} • ${sale.dayKey ? `Today: ${sale.dayKey}` : ""}`.trim();
-
-  const gridWrap = card.querySelector("#shopGridWrap");
-  gridWrap.innerHTML = renderShopGrid(items, sale);
-
-  gridWrap.querySelectorAll("[data-item]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const itemId = btn.getAttribute("data-item");
-      const it = items.find(x => x.id === itemId);
-      if (!it) return;
-
-      const pane = card.querySelector("#detailsPane");
-      pane.innerHTML = renderDetails(it, sale);
-
-      pane.querySelector("#buyBtn")?.addEventListener("click", async () => {
-        const msg = pane.querySelector("#shopMsg");
-        msg.textContent = "Buying...";
-
-        try {
-          await buyShopItem({ itemId: it.id });
-          msg.textContent = "Purchased! Added to Collection.";
-        } catch (e) {
-          msg.textContent = e?.message || "Purchase failed.";
-        }
-      });
-    });
+  // clicking tiles
+  card.querySelectorAll(".shopTile").forEach(btn => {
+    btn.addEventListener("click", () => onSelect(btn.dataset.item));
   });
 }
 
-async function renderCollection(){
-  const u = uid();
-  const card = el("collectionCard");
-  if (!u || !card) return;
+async function buySelectedItem(itemId) {
+  const uid = requireUid();
+  const fn = httpsCallable(getFunctions(), "buyShopItem");
+  return fn({ itemId });
+}
 
-  card.innerHTML = `
-    <div class="bigHeader">
-      <div>
-        <div class="bigTitle">Collection</div>
-        <div class="smallNote">Recent items glow for 24 hours.</div>
-      </div>
-      <button class="ghostBtn" id="closeCol">Close</button>
-    </div>
-    <div id="colGrid" class="collectionGrid"></div>
-  `;
+function renderCollectionModal(uid) {
+  const card = $("collectionCard");
+  const modal = $("collectionModal");
+  if (!card || !modal) return;
 
-  card.querySelector("#closeCol")?.addEventListener("click", () => closeModal("collectionModal"));
+  // live inventory listener
+  const colRef = collection(db, "users", uid, "collection");
+  onSnapshot(colRef, (snap) => {
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a,b) => (b.lastAcquiredAt?.seconds || 0) - (a.lastAcquiredAt?.seconds || 0));
 
-  const snap = await getDocs(collection(db, "users", u, "collection"));
-  const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-  const grid = card.querySelector("#colGrid");
-  if (!items.length){
-    grid.innerHTML = `<div class="smallNote">No items yet.</div>`;
-    return;
-  }
-
-  const now = Date.now();
-  const recentMs = 24 * 60 * 60 * 1000;
-
-  grid.innerHTML = items.map(it => {
-    const t = it.lastAcquiredAt?.toDate?.()?.getTime?.() ?? 0;
-    const recent = (now - t) < recentMs;
-
-    return `
-      <div class="invCard ${recent ? "recentGlow" : ""}">
+    const grid = items.length ? items.map(it => `
+      <div class="invTile ${it.justBought ? "newGlow" : ""}">
         <img class="invIcon" src="${it.icon}" alt="${it.name}">
         <div class="invName">${it.name}</div>
-        <div class="invMeta">${rarityLabel(it.rarity)} • Qty: ${it.qty ?? 1}</div>
+        <div class="invMeta">
+          <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
+          <span class="qty">x${it.qty || 1}</span>
+        </div>
       </div>
+    `).join("") : `<div class="smallNote">No items yet. Buy something in the shop!</div>`;
+
+    card.innerHTML = `
+      <div class="bigHeaderRow">
+        <div style="font-weight:950;font-size:18px;">Collection</div>
+        <button class="ghostBtn" id="closeCollectionBtn">Close</button>
+      </div>
+      <div class="invGrid">${grid}</div>
     `;
-  }).join("");
+
+    $("closeCollectionBtn")?.addEventListener("click", () => modal.classList.add("hidden"));
+  });
 }
 
 export function initShopUI() {
   console.log("✅ initShopUI loaded");
 
-  const giftBtn = el("openGiftShopBtn");
-  const colBtn  = el("openCollectionBtn");
+  const giftBtn = $("openGiftShopBtn");
+  const colBtn = $("openCollectionBtn");
+  const giftModal = $("giftShopModal");
+  const colModal = $("collectionModal");
 
-  const giftModal = el("giftShopModal");
-  const colModal  = el("collectionModal");
+  let shopItems = [];
+  let sale = { discounts: {}, label: "Loading sale..." };
+  let selectedId = null;
+
+  async function refreshShop() {
+    try {
+      sale = await loadSale();
+      shopItems = await loadShopItemsFromFirestore();
+
+      // Default select first item
+      if (!selectedId && shopItems.length) selectedId = shopItems[0].id;
+
+      renderShopModal({
+        items: shopItems,
+        sale,
+        selectedId,
+        onSelect: (id) => {
+          selectedId = id;
+          renderShopModal({ items: shopItems, sale, selectedId, onSelect: (x)=>{ selectedId=x; refreshShop(); } });
+          // re-wire buy button after re-render
+          wireBuyButton();
+        }
+      });
+
+      wireBuyButton();
+    } catch (e) {
+      console.error(e);
+      $("giftShopCard").innerHTML = `<div class="smallNote">Shop failed to load: ${e.message}</div>`;
+    }
+  }
+
+  function wireBuyButton() {
+    const buyBtn = $("buyItemBtn");
+    if (!buyBtn || !selectedId) return;
+
+    buyBtn.onclick = async () => {
+      const msg = $("buyMsg");
+      if (msg) msg.textContent = "";
+
+      try {
+        const res = await buySelectedItem(selectedId);
+        if (msg) msg.textContent = `✅ Purchased! (-${res.data.finalPrice} coins)`;
+      } catch (err) {
+        console.error(err);
+        const m = err?.message || "Purchase failed.";
+        if (msg) msg.textContent = `❌ ${m}`;
+      }
+    };
+  }
 
   if (giftBtn && giftModal) {
     giftBtn.onclick = async () => {
-      if (!uid()) return alert("Please log in first.");
-      openModal("giftShopModal");
-      await renderGiftShop();
+      giftModal.classList.remove("hidden");
+      await refreshShop();
     };
   }
 
   if (colBtn && colModal) {
-    colBtn.onclick = async () => {
-      if (!uid()) return alert("Please log in first.");
-      openModal("collectionModal");
-      await renderCollection();
+    colBtn.onclick = () => {
+      colModal.classList.remove("hidden");
+      try {
+        const uid = requireUid();
+        renderCollectionModal(uid);
+      } catch (e) {
+        $("collectionCard").innerHTML = `<div class="smallNote">${e.message}</div>`;
+      }
     };
   }
 
