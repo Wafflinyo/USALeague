@@ -869,4 +869,91 @@ h2{
 .rarity.epic{ border-color: rgba(200,120,255,0.55); }
 .rarity.legendary{ border-color: rgba(255,210,90,0.70); }
 
+/* =========================
+   SHOP TEXT OVERFLOW FIXES
+   Paste at BOTTOM of style.css
+   ========================= */
+
+/* Make tiles a clean vertical layout */
+.shopTile{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 200px;           /* keeps tiles consistent */
+  overflow: hidden;            /* never bleed outside */
+}
+
+/* Icons should never stretch layout */
+.shopIcon{
+  height: 86px;
+  width: 100%;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+/* Name: clamp to 2 lines with ellipsis (prevents spilling) */
+.shopTileName{
+  margin-top: 2px;
+  font-weight: 950;
+  color: rgba(255,255,255,0.96);
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;       /* <- 2 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  line-height: 1.15;
+  min-height: calc(1.15em * 2); /* reserves space so meta doesn't jump */
+}
+
+/* Meta row stays pinned near bottom */
+.shopTileMeta{
+  margin-top: auto;            /* pushes meta to bottom of tile */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 8px;
+
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.80);
+}
+
+/* Price never wraps weird */
+.shopTileMeta .price{
+  white-space: nowrap;
+}
+
+/* Details panel: allow wrapping cleanly instead of clipping */
+.shopDetail{
+  overflow: hidden;
+}
+
+.shopDetailName{
+  font-weight: 950;
+  font-size: 18px;
+  color: rgba(255,255,255,0.96);
+
+  /* allow wrap (no cutting) */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.15;
+}
+
+/* Description also wraps safely */
+.shopDetailDesc{
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Optional: if your rarity/stack tags ever overflow */
+.shopDetailTags{
+  flex-wrap: wrap;
+}
+
+
 
