@@ -16,6 +16,28 @@ const SEASON_ID = "season1";
 const SCHEDULE_PATH = "data/schedule.json";
 
 const el = (id) => document.getElementById(id);
+const STANDINGS_PATH = "data/standings.json";
+let TEAM_LOGO_MAP = null;
+
+async function getTeamLogoMap() {
+  if (TEAM_LOGO_MAP) return TEAM_LOGO_MAP;
+
+  const standings = await loadJSON(STANDINGS_PATH);
+  const teams = standings.teams || [];
+  const map = {};
+  for (const t of teams) {
+    if (t?.name && t?.logo) map[t.name] = t.logo;
+  }
+  TEAM_LOGO_MAP = map;
+  return map;
+}
+
+function confClass(conf) {
+  const c = String(conf || "").toLowerCase();
+  if (c.includes("solar")) return "solar";
+  if (c.includes("lunar")) return "lunar";
+  return "ooc";
+}
 
 async function loadJSON(path) {
   const res = await fetch(path, { cache: "no-store" });
@@ -101,7 +123,7 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
-function renderVotingUI({ date, games5 }, savedPicks = {}) {
+async function renderVotingUI({ date, games5 }, savedPicks = {}) {
   const votingMeta = el("votingMeta");
   const votingList = el("votingList");
   const submitBtn = el("submitVotesBtn");
@@ -110,74 +132,88 @@ function renderVotingUI({ date, games5 }, savedPicks = {}) {
   if (!votingList) return;
 
   const locked = isLocked(date);
+  const logoMap = await getTeamLogoMap();
 
-  if (votingMeta) {
-    votingMeta.textContent = `Next game day: ${date} (5 games)`;
-  }
-
+  if (votingMeta) votingMeta.textContent = `Next game day: ${date} (5 games)`;
   if (lockNote) {
     lockNote.textContent = locked
       ? `Voting is locked for ${date}.`
       : `Voting closes when ${date} begins (ET).`;
   }
 
-  // Build 5 matchups with radio choices
+  const logoFor = (teamName) => logoMap?.[teamName] || "assets/logos/league/usa-logo.png";
+
   votingList.innerHTML = `
-    <div class="scheduleBox" style="max-height:420px;">
-      ${games5.map((g, idx) => {
-        const key = `g${idx + 1}`;
-        const picked = savedPicks[key] || null;
+    <div class="votingWrap">
+      <div class="votingGames">
+        ${games5.map((g, idx) => {
+          const key = `g${idx + 1}`;
+          const picked = savedPicks[key] || null;
 
-        const away = escapeHtml(g.away);
-        const home = escapeHtml(g.home);
+          const awayName = g.away;
+          const homeName = g.home;
 
-        const awayChecked = picked === g.away ? "checked" : "";
-        const homeChecked = picked === g.home ? "checked" : "";
+          const away = escapeHtml(awayName);
+          const home = escapeHtml(homeName);
 
-        return `
-          <div class="gameCard">
-            <div class="gameTop">
-              <div class="gameDate">Game ${idx + 1}</div>
-              <div class="gameMeta">${escapeHtml(g.conference || "")}</div>
+          const awayChecked = picked === awayName ? "checked" : "";
+          const homeChecked = picked === homeName ? "checked" : "";
+
+          const conf = escapeHtml(g.conference || "OOC");
+          const klass = confClass(g.conference);
+
+          return `
+            <div class="voteGameCard ${klass}">
+              <div class="voteGameTop">
+                <div class="voteGameTitle">Game ${idx + 1}</div>
+                <div class="voteGameMeta">${conf}</div>
+              </div>
+
+              <div class="voteMatchup">
+                <label class="voteTeamPill" title="${away}" style="cursor:${locked ? "not-allowed" : "pointer"};">
+                  <input type="radio" name="${key}" value="${away}" ${awayChecked} ${locked ? "disabled" : ""} />
+                  <img class="voteTeamLogo" src="${logoFor(awayName)}" alt="${away} logo" />
+                  <span class="voteTeamName">${away}</span>
+                </label>
+
+                <div class="voteAt">@</div>
+
+                <label class="voteTeamPill" title="${home}" style="cursor:${locked ? "not-allowed" : "pointer"};">
+                  <input type="radio" name="${key}" value="${home}" ${homeChecked} ${locked ? "disabled" : ""} />
+                  <img class="voteTeamLogo" src="${logoFor(homeName)}" alt="${home} logo" />
+                  <span class="voteTeamName">${home}</span>
+                </label>
+              </div>
             </div>
+          `;
+        }).join("")}
+      </div>
 
-            <div class="matchup" style="align-items:flex-start;">
-              <label class="teamPill" style="cursor:${locked ? "not-allowed" : "pointer"};">
-                <input type="radio" name="${key}" value="${away}" ${awayChecked} ${locked ? "disabled" : ""} />
-                <span><b>${away}</b></span>
-              </label>
-
-              <div class="small" style="padding:10px 6px;">@</div>
-
-              <label class="teamPill" style="cursor:${locked ? "not-allowed" : "pointer"};">
-                <input type="radio" name="${key}" value="${home}" ${homeChecked} ${locked ? "disabled" : ""} />
-                <span><b>${home}</b></span>
-              </label>
-            </div>
-          </div>
-        `;
-      }).join("")}
+      <div class="votingActions">
+        <button class="primaryBtn" id="submitVotesBtnInner">${locked ? "Voting Locked" : "Submit Votes"}</button>
+        <div class="smallNote" id="voteLockNoteInner"></div>
+      </div>
     </div>
   `;
 
-  if (submitBtn) {
-    submitBtn.disabled = locked;
-    submitBtn.textContent = locked ? "Voting Locked" : "Submit Votes";
-  }
-}
+  // Move lock note into the new inner element so it sits BELOW the button
+  const innerNote = el("voteLockNoteInner");
+  if (innerNote) innerNote.textContent = lockNote?.textContent || "";
 
-function getPicksFromUI() {
-  const picks = {};
-  for (let i = 1; i <= 5; i++) {
-    const name = `g${i}`;
-    const chosen = document.querySelector(`input[name="${name}"]:checked`);
-    picks[name] = chosen ? chosen.value : null;
+  // Wire the new button to your existing handler
+  const innerBtn = el("submitVotesBtnInner");
+  if (innerBtn) {
+    innerBtn.disabled = locked;
+    // forward click to the real handler (if you kept yours on #submitVotesBtn)
+    // We’ll just re-run the same click logic by triggering the old button if it exists:
+    if (submitBtn) {
+      innerBtn.addEventListener("click", () => submitBtn.click());
+    }
   }
-  return picks;
-}
 
-function countChosen(picks) {
-  return Object.values(picks).filter(Boolean).length;
+  // Hide the old button/note if they exist in HTML (prevents overlap)
+  if (submitBtn) submitBtn.style.display = "none";
+  if (lockNote) lockNote.style.display = "none";
 }
 
 // ---------- FIRESTORE PATHS ----------
@@ -216,7 +252,7 @@ export function initVoting() {
       // Not logged in
       if (!window.__USA_UID__) {
         if (votingMeta) votingMeta.textContent = `Next game day: ${next.date} (login to vote)`;
-        renderVotingUI(next, {});
+        await renderVotingUI(next, {});
         if (submitBtn) submitBtn.disabled = true;
         if (lockNote) lockNote.textContent = "Login required to submit votes.";
         return;
@@ -229,7 +265,7 @@ export function initVoting() {
       const snap = await getDoc(ref);
       const saved = snap.exists() ? (snap.data().picks || {}) : {};
 
-      renderVotingUI(next, saved);
+      await renderVotingUI(next, saved);
 
     } catch (e) {
       console.error("Voting refresh failed:", e);

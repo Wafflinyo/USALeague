@@ -422,4 +422,118 @@ h2{
   border-bottom: 1px solid rgba(255,255,255,0.18);
 }
 
+/* =========================
+   VOTING UI (better layout)
+   ========================= */
+
+.votingWrap{
+  display:flex;
+  flex-direction:column;
+  gap: 14px;
+}
+
+.votingGames{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+/* Each game gets its own card */
+.voteGameCard{
+  border-radius: 16px;
+  padding: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  box-shadow: 0 12px 22px rgba(0,0,0,0.12);
+}
+
+/* Conference color themes */
+.voteGameCard.solar{
+  background: linear-gradient(135deg, rgba(255, 214, 102, 0.92), rgba(255, 255, 255, 0.70));
+  box-shadow: 0 12px 22px rgba(0,0,0,0.12), 0 0 22px rgba(245,193,61,0.25);
+}
+
+.voteGameCard.lunar{
+  background: linear-gradient(135deg, rgba(70, 130, 255, 0.28), rgba(255, 255, 255, 0.78));
+  box-shadow: 0 12px 22px rgba(0,0,0,0.12), 0 0 22px rgba(47,123,255,0.25);
+}
+
+.voteGameCard.ooc{
+  background: linear-gradient(135deg,
+    rgba(255, 214, 102, 0.88) 0%,
+    rgba(255, 255, 255, 0.78) 50%,
+    rgba(70, 130, 255, 0.24) 100%
+  );
+  box-shadow: 0 12px 22px rgba(0,0,0,0.12);
+}
+
+/* Header row inside each game card */
+.voteGameTop{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.voteGameTitle{
+  font-weight: 950;
+  color: var(--ink);
+}
+
+.voteGameMeta{
+  font-weight: 800;
+  font-size: 13px;
+  color: rgba(27,27,31,0.75);
+}
+
+/* Matchup row */
+.voteMatchup{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.voteAt{
+  font-weight: 950;
+  opacity: 0.85;
+  padding: 0 6px;
+}
+
+/* Team pill */
+.voteTeamPill{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(0,0,0,0.14);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.10);
+  user-select:none;
+}
+
+.voteTeamPill input{
+  transform: scale(1.05);
+}
+
+.voteTeamLogo{
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 7px rgba(0,0,0,0.18));
+}
+
+.voteTeamName{
+  font-weight: 950;
+}
+
+/* Actions (button stays BELOW list, never overlaps) */
+.votingActions{
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+  padding-top: 2px;
+}
+
 
