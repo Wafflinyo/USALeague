@@ -47,7 +47,6 @@ async function loadJSON(path) {
 
 // ---------- TIME HELPERS (locks on game date at 12:00am ET) ----------
 function nowET() {
-  // Convert "now" to an ET date key YYYY-MM-DD reliably
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/New_York",
     year: "numeric",
@@ -89,10 +88,6 @@ function findNextGameDay(schedule) {
   // sorted dates
   const dates = Array.from(byDate.keys()).sort();
 
-  // choose the earliest date that:
-  // - has at least 5 games
-  // - is not fully completed
-  // - is today or later (ET)
   const today = nowET();
 
   for (const date of dates) {
@@ -103,8 +98,6 @@ function findNextGameDay(schedule) {
     const done = isGameDayComplete(games5);
 
     if (done) continue;
-
-    // If it's in the past, skip it
     if (date < today) continue;
 
     return { date, games5 };
@@ -113,7 +106,7 @@ function findNextGameDay(schedule) {
   return null;
 }
 
-// ---------- UI BUILDERS ----------
+// ---------- UI HELPERS ----------
 function escapeHtml(s) {
   return String(s)
     .replaceAll("&", "&amp;")
@@ -123,7 +116,8 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
-async function renderVotingUI({ date, games5 }, savedPicks = {}) {
+// ✅ IMPORTANT: value attributes must be the RAW team string
+function renderVotingUI({ date, games5 }, savedPicks = {}) {
   const votingMeta = el("votingMeta");
   const votingList = el("votingList");
   const submitBtn = el("submitVotesBtn");
@@ -132,7 +126,6 @@ async function renderVotingUI({ date, games5 }, savedPicks = {}) {
   if (!votingList) return;
 
   const locked = isLocked(date);
-  const logoMap = await getTeamLogoMap();
 
   if (votingMeta) votingMeta.textContent = `Next game day: ${date} (5 games)`;
   if (lockNote) {
@@ -141,8 +134,7 @@ async function renderVotingUI({ date, games5 }, savedPicks = {}) {
       : `Voting closes when ${date} begins (ET).`;
   }
 
-  const logoFor = (teamName) => logoMap?.[teamName] || "assets/logos/league/usa-logo.png";
-
+  // We fill votingList ONLY. We do NOT create extra submit buttons.
   votingList.innerHTML = `
     <div class="votingWrap">
       <div class="votingGames">
@@ -150,11 +142,11 @@ async function renderVotingUI({ date, games5 }, savedPicks = {}) {
           const key = `g${idx + 1}`;
           const picked = savedPicks[key] || null;
 
-          const awayName = g.away;
-          const homeName = g.home;
+          const awayName = String(g.away || "");
+          const homeName = String(g.home || "");
 
-          const away = escapeHtml(awayName);
-          const home = escapeHtml(homeName);
+          const awayText = escapeHtml(awayName);
+          const homeText = escapeHtml(homeName);
 
           const awayChecked = picked === awayName ? "checked" : "";
           const homeChecked = picked === homeName ? "checked" : "";
@@ -162,6 +154,7 @@ async function renderVotingUI({ date, games5 }, savedPicks = {}) {
           const conf = escapeHtml(g.conference || "OOC");
           const klass = confClass(g.conference);
 
+          // We’ll fill logos async in initVoting (after we have logoMap)
           return `
             <div class="voteGameCard ${klass}">
               <div class="voteGameTop">
@@ -170,55 +163,59 @@ async function renderVotingUI({ date, games5 }, savedPicks = {}) {
               </div>
 
               <div class="voteMatchup">
-                <label class="voteTeamPill" title="${away}" style="cursor:${locked ? "not-allowed" : "pointer"};">
-                  <input type="radio" name="${key}" value="${away}" ${awayChecked} ${locked ? "disabled" : ""} />
-                  <img class="voteTeamLogo" src="${logoFor(awayName)}" alt="${away} logo" />
-                  <span class="voteTeamName">${away}</span>
+                <label class="voteTeamPill" title="${awayText}" style="cursor:${locked ? "not-allowed" : "pointer"};">
+                  <input type="radio" name="${key}" value="${awayName}" ${awayChecked} ${locked ? "disabled" : ""} />
+                  <img class="voteTeamLogo" data-team="${awayText}" alt="${awayText} logo" />
+                  <span class="voteTeamName">${awayText}</span>
                 </label>
 
                 <div class="voteAt">@</div>
 
-                <label class="voteTeamPill" title="${home}" style="cursor:${locked ? "not-allowed" : "pointer"};">
-                  <input type="radio" name="${key}" value="${home}" ${homeChecked} ${locked ? "disabled" : ""} />
-                  <img class="voteTeamLogo" src="${logoFor(homeName)}" alt="${home} logo" />
-                  <span class="voteTeamName">${home}</span>
+                <label class="voteTeamPill" title="${homeText}" style="cursor:${locked ? "not-allowed" : "pointer"};">
+                  <input type="radio" name="${key}" value="${homeName}" ${homeChecked} ${locked ? "disabled" : ""} />
+                  <img class="voteTeamLogo" data-team="${homeText}" alt="${homeText} logo" />
+                  <span class="voteTeamName">${homeText}</span>
                 </label>
               </div>
             </div>
           `;
         }).join("")}
       </div>
-
-      <div class="votingActions">
-        <button class="primaryBtn" id="submitVotesBtnInner">${locked ? "Voting Locked" : "Submit Votes"}</button>
-        <div class="smallNote" id="voteLockNoteInner"></div>
-      </div>
     </div>
   `;
 
-  // Move lock note into the new inner element so it sits BELOW the button
-  const innerNote = el("voteLockNoteInner");
-  if (innerNote) innerNote.textContent = lockNote?.textContent || "";
-
-  // Wire the new button to your existing handler
-  const innerBtn = el("submitVotesBtnInner");
-  if (innerBtn) {
-    innerBtn.disabled = locked;
-    // forward click to the real handler (if you kept yours on #submitVotesBtn)
-    // We’ll just re-run the same click logic by triggering the old button if it exists:
-    if (submitBtn) {
-      innerBtn.addEventListener("click", () => submitBtn.click());
-    }
+  if (submitBtn) {
+    submitBtn.disabled = locked;
+    submitBtn.textContent = locked ? "Voting Locked" : "Submit Votes";
   }
-
-  // Hide the old button/note if they exist in HTML (prevents overlap)
-  if (submitBtn) submitBtn.style.display = "none";
-  if (lockNote) lockNote.style.display = "none";
 }
 
-// ---------- FIRESTORE PATHS ----------
 function voteDocRef(uid, date) {
   return doc(db, "seasons", SEASON_ID, "gameDays", date, "votes", uid);
+}
+
+// ✅ read picks from radio buttons
+function getPicksFromUI() {
+  const picks = {};
+  for (let i = 1; i <= 5; i++) {
+    const chosen = document.querySelector(`input[name="g${i}"]:checked`);
+    if (chosen) picks[`g${i}`] = chosen.value; // RAW team name
+  }
+  return picks;
+}
+
+function countChosen(picks) {
+  return Object.keys(picks || {}).length;
+}
+
+function samePicks(a = {}, b = {}) {
+  const ak = Object.keys(a);
+  const bk = Object.keys(b);
+  if (ak.length !== bk.length) return false;
+  for (const k of ak) {
+    if (a[k] !== b[k]) return false;
+  }
+  return true;
 }
 
 // =====================================================
@@ -232,8 +229,62 @@ export function initVoting() {
 
   if (!votingList) return;
 
-  let currentGameDay = null;      // { date, games5 }
-  let currentUid = null;
+  let currentGameDay = null;     // { date, games5 }
+  let savedPicks = {};           // saved from Firestore for the current day
+
+  function updateSubmitButtonState() {
+    if (!submitBtn || !currentGameDay) return;
+
+    const locked = isLocked(currentGameDay.date);
+    if (locked) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Voting Locked";
+      return;
+    }
+
+    const picksNow = getPicksFromUI();
+    const chosen = countChosen(picksNow);
+
+    // require 5 picks
+    if (chosen < 5) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = `Submit Votes (${chosen}/5)`;
+      return;
+    }
+
+    // if nothing saved yet
+    if (!savedPicks || Object.keys(savedPicks).length === 0) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Votes";
+      return;
+    }
+
+    // saved exists: compare
+    if (samePicks(savedPicks, picksNow)) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitted ✅";
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Resubmit Votes";
+    }
+  }
+
+  async function applyTeamLogos() {
+    try {
+      const logoMap = await getTeamLogoMap();
+      const fallback = "assets/logos/league/usa-logo.png";
+      document.querySelectorAll(".voteTeamLogo[data-team]").forEach(img => {
+        const team = img.getAttribute("data-team"); // escaped
+        // find original key by comparing escaped—safe fallback:
+        // easiest: just use alt text (already escaped) for display; logo map uses raw names
+        // We'll search by raw keys:
+        const raw = Object.keys(logoMap).find(k => escapeHtml(k) === team);
+        img.src = raw ? (logoMap[raw] || fallback) : fallback;
+      });
+    } catch (e) {
+      console.warn("Logo map load failed:", e);
+    }
+  }
 
   async function refreshVoting() {
     try {
@@ -244,6 +295,7 @@ export function initVoting() {
         if (votingMeta) votingMeta.textContent = "No upcoming game day found.";
         votingList.innerHTML = `<div class="panelNote">Add future games to data/schedule.json to enable voting.</div>`;
         if (submitBtn) submitBtn.disabled = true;
+        if (lockNote) lockNote.textContent = "";
         return;
       }
 
@@ -251,21 +303,34 @@ export function initVoting() {
 
       // Not logged in
       if (!window.__USA_UID__) {
+        savedPicks = {};
         if (votingMeta) votingMeta.textContent = `Next game day: ${next.date} (login to vote)`;
-        await renderVotingUI(next, {});
-        if (submitBtn) submitBtn.disabled = true;
+        renderVotingUI(next, {});
+        await applyTeamLogos();
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Login required";
+        }
         if (lockNote) lockNote.textContent = "Login required to submit votes.";
         return;
       }
 
-      currentUid = window.__USA_UID__;
+      const uid = window.__USA_UID__;
 
       // Load saved picks (if any)
-      const ref = voteDocRef(currentUid, next.date);
+      const ref = voteDocRef(uid, next.date);
       const snap = await getDoc(ref);
-      const saved = snap.exists() ? (snap.data().picks || {}) : {};
+      savedPicks = snap.exists() ? (snap.data().picks || {}) : {};
 
-      await renderVotingUI(next, saved);
+      renderVotingUI(next, savedPicks);
+      await applyTeamLogos();
+
+      // watch for changes to enable resubmit
+      document.querySelectorAll(`#votingList input[type="radio"]`).forEach(r => {
+        r.addEventListener("change", updateSubmitButtonState);
+      });
+
+      updateSubmitButtonState();
 
     } catch (e) {
       console.error("Voting refresh failed:", e);
@@ -288,8 +353,8 @@ export function initVoting() {
         return;
       }
 
-      const picks = getPicksFromUI();
-      const chosen = countChosen(picks);
+      const picksNow = getPicksFromUI();
+      const chosen = countChosen(picksNow);
 
       if (chosen < 5) {
         alert(`Pick winners for all 5 games before submitting. (${chosen}/5 selected)`);
@@ -301,19 +366,23 @@ export function initVoting() {
         await setDoc(ref, {
           uid,
           date,
-          picks,
+          picks: picksNow,
           submittedAt: serverTimestamp(),
         }, { merge: true });
 
-        alert(`Votes submitted for ${date}!`);
+        // update saved state so "Submitted ✅" / "Resubmit" works immediately
+        savedPicks = { ...picksNow };
+        updateSubmitButtonState();
+
+        alert(`Votes saved for ${date}!`);
       } catch (e) {
         console.error("Submit votes failed:", e);
-        alert("Failed to submit votes. Check console.");
+        alert(`Failed to submit votes: ${e?.message || "Check console"}`);
       }
     });
   }
 
-  // If user logs in later, reload voting
+  // If user logs in/out later, reload voting
   let lastUid = window.__USA_UID__ || null;
   setInterval(() => {
     const uid = window.__USA_UID__ || null;
@@ -323,7 +392,6 @@ export function initVoting() {
     }
   }, 500);
 
-  // Initial load
   refreshVoting();
 }
 
@@ -335,7 +403,6 @@ export function initPredictionLeaders() {
   const root = el("predictionLeaders");
   if (!root) return;
 
-  // listen to all users; league is small so this is fine
   const usersQ = query(collection(db, "users"), orderBy("correctPicks", "desc"));
 
   onSnapshot(usersQ, (snap) => {
@@ -351,7 +418,6 @@ export function initPredictionLeaders() {
       rows.push({ username, correct, total, pct });
     });
 
-    // Sort highest % first, then higher total picks
     rows.sort((a, b) => {
       if (b.pct !== a.pct) return b.pct - a.pct;
       return b.total - a.total;
