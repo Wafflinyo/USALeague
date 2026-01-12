@@ -780,17 +780,38 @@ h2{
   padding: 12px;
 }
 
+/* --- SHOP DETAILS (RIGHT PANEL) --- */
 .shopDetailTop{
   display:flex;
-  gap: 12px;
-  align-items:center;
+  gap: 14px;
+  align-items:flex-start;   /* top-align so big image doesn't squash text */
 }
 
+/* Make the selected item image BIG */
 .shopDetailIcon{
-  width: 96px;
-  height: 96px;
+  width: 220px;             /* ✅ bigger preview */
+  height: 220px;
+  flex: 0 0 220px;          /* keep its space */
   object-fit: contain;
+  border-radius: 14px;
+
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: 10px;
+
+  /* optional: make it pop */
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
 }
+
+/* On smaller screens, scale down so it still fits */
+@media (max-width: 900px){
+  .shopDetailIcon{
+    width: 140px;
+    height: 140px;
+    flex-basis: 140px;
+  }
+}
+
 
 .shopDetailName{
   font-weight: 950;
