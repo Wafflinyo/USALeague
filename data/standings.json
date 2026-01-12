@@ -1,41 +1,41 @@
 {
   "leagueOrder": [
-    "Narf Bullets",
-    "Nashville Knights",
     "Comet Eons",
     "Egg Beaters",
     "Dreary Lane",
+    "Narf Bullets",
+    "Nashville Knights",
+    "Hopedogo Retrievers",
+    "Lunar Eclypse",
     "Waffle Batters",
     "BRF Bombers",
-    "MK Monarchs",
-    "Hopedogo Retrievers",
-    "Lunar Eclypse"
+    "MK Monarchs"
   ],
   "lunarTeams": [
     "Egg Beaters",
     "Dreary Lane",
+    "Lunar Eclypse",
     "Waffle Batters",
-    "BRF Bombers",
-    "Lunar Eclypse"
+    "BRF Bombers"
   ],
   "solarTeams": [
+    "Comet Eons",
     "Narf Bullets",
     "Nashville Knights",
-    "Comet Eons",
-    "MK Monarchs",
-    "Hopedogo Retrievers"
+    "Hopedogo Retrievers",
+    "MK Monarchs"
   ],
   "teams": [
-    { "name": "Egg Beaters", "conference": "Lunar", "logo": "assets/logos/teams/egg-beaters.PNG", "wins": 1, "losses": 0, "runsFor": 4, "runsAgainst": 3 },
-    { "name": "Dreary Lane", "conference": "Lunar", "logo": "assets/logos/teams/dreary-lane.PNG", "wins": 1, "losses": 0, "runsFor": 1, "runsAgainst": 0 },
-    { "name": "Waffle Batters", "conference": "Lunar", "logo": "assets/logos/teams/waffle-batters.PNG", "wins": 0, "losses": 1, "runsFor": 3, "runsAgainst": 4 },
-    { "name": "BRF Bombers", "conference": "Lunar", "logo": "assets/logos/teams/brf-bombers.PNG", "wins": 0, "losses": 1, "runsFor": 0, "runsAgainst": 1 },
-    { "name": "Lunar Eclypse", "conference": "Lunar", "logo": "assets/logos/teams/lunar-eclypse.PNG", "wins": 0, "losses": 1, "runsFor": 1, "runsAgainst": 7 },
+    { "name": "Egg Beaters", "conference": "Lunar", "logo": "assets/logos/teams/egg-beaters.PNG", "wins": 2, "losses": 0, "runsFor": 8, "runsAgainst": 5 },
+    { "name": "Dreary Lane", "conference": "Lunar", "logo": "assets/logos/teams/dreary-lane.PNG", "wins": 2, "losses": 0, "runsFor": 5, "runsAgainst": 3 },
+    { "name": "Waffle Batters", "conference": "Lunar", "logo": "assets/logos/teams/waffle-batters.PNG", "wins": 0, "losses": 2, "runsFor": 6, "runsAgainst": 8 },
+    { "name": "BRF Bombers", "conference": "Lunar", "logo": "assets/logos/teams/brf-bombers.PNG", "wins": 0, "losses": 2, "runsFor": 5, "runsAgainst": 8 },
+    { "name": "Lunar Eclypse", "conference": "Lunar", "logo": "assets/logos/teams/lunar-eclypse.PNG", "wins": 1, "losses": 1, "runsFor": 8, "runsAgainst": 12 },
 
-    { "name": "Narf Bullets", "conference": "Solar", "logo": "assets/logos/teams/narf-bullets.PNG", "wins": 1, "losses": 0, "runsFor": 7, "runsAgainst": 1 },
-    { "name": "Nashville Knights", "conference": "Solar", "logo": "assets/logos/teams/nashville-knights.PNG", "wins": 1, "losses": 0, "runsFor": 7, "runsAgainst": 2 },
-    { "name": "Comet Eons", "conference": "Solar", "logo": "assets/logos/teams/comet-eons.PNG", "wins": 1, "losses": 0, "runsFor": 8, "runsAgainst": 5 },
-    { "name": "MK Monarchs", "conference": "Solar", "logo": "assets/logos/teams/mk-monarchs.PNG", "wins": 0, "losses": 1, "runsFor": 5, "runsAgainst": 8 },
-    { "name": "Hopedogo Retrievers", "conference": "Solar", "logo": "assets/logos/teams/hopedogo-retrievers.PNG", "wins": 0, "losses": 1, "runsFor": 2, "runsAgainst": 7 }
+    { "name": "Narf Bullets", "conference": "Solar", "logo": "assets/logos/teams/narf-bullets.PNG", "wins": 1, "losses": 1, "runsFor": 7, "runsAgainst": 4 },
+    { "name": "Nashville Knights", "conference": "Solar", "logo": "assets/logos/teams/nashville-knights.PNG", "wins": 1, "losses": 1, "runsFor": 10, "runsAgainst": 9 },
+    { "name": "Comet Eons", "conference": "Solar", "logo": "assets/logos/teams/comet-eons.PNG", "wins": 2, "losses": 0, "runsFor": 15, "runsAgainst": 8 },
+    { "name": "MK Monarchs", "conference": "Solar", "logo": "assets/logos/teams/mk-monarchs.PNG", "wins": 0, "losses": 2, "runsFor": 7, "runsAgainst": 10 },
+    { "name": "Hopedogo Retrievers", "conference": "Solar", "logo": "assets/logos/teams/hopedogo-retrievers.PNG", "wins": 1, "losses": 1, "runsFor": 5, "runsAgainst": 7 }
   ]
 }

@@ -3,7 +3,7 @@ import { db } from "./firebase.js";
 import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import { initTabs, renderStandings, renderLeaders, renderLogs, initTicker } from "./render.js";
-import { initVoting } from "./live.js";
+import { initVoting, initPredictionLeaders } from "./live.js";
 import { initShopUI } from "./shop.js";
 import { initSlotsUI } from "./slots.js";
 import { initSuggestions } from "./suggestions.js";
@@ -101,6 +101,7 @@ initStaticPanels(); // standings/leaders/logs/ticker text
 
 // Live features (they can read window.__USA_UID__ when needed)
 initVoting();
+initPredictionLeaders();
 initShopUI();
 initSlotsUI();
 initSuggestions();

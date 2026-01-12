@@ -1,39 +1,40 @@
 {
   "homeruns": [
     { "player": "Boomerang Bro", "team": "Nashville Knights", "value": 3 },
+    { "player": "Birdo", "team": "Waffle Batters", "value": 2 },
+    { "player": "King K. Rool", "team": "Egg Beaters", "value": 2 },
+    { "player": "Blitter", "team": "Nashville Knights", "value": 2 },
     { "player": "Kritter", "team": "Comet Eons", "value": 1 },
     { "player": "Fire Bro", "team": "Narf Bullets", "value": 1 },
-    { "player": "Birdo", "team": "Waffle Batters", "value": 1 },
-    { "player": "King K. Rool", "team": "Egg Beaters", "value": 1 },
     { "player": "Diddy Kong", "team": "MK Monarchs", "value": 1 },
     { "player": "Hammer Bro", "team": "Comet Eons", "value": 1 },
     { "player": "Wiggler", "team": "Hopedogo Retrievers", "value": 1 },
-    { "player": "King Boo", "team": "Hopedogo Retrievers", "value": 1 },
-    { "player": "Blitter", "team": "Nashville Knights", "value": 1 }
+    { "player": "King Boo", "team": "Hopedogo Retrievers", "value": 1 }
   ],
   "rbis": [
-    { "player": "Boomerang Bro", "team": "Nashville Knights", "value": 6 },
-    { "player": "Hammer Bro", "team": "Comet Eons", "value": 3 },
-    { "player": "Green Toad", "team": "Narf Bullets", "value": 2 },
-    { "player": "Funky Kong", "team": "MK Monarchs", "value": 2 },
-    { "player": "Brown Kritter", "team": "Egg Beaters", "value": 2 },
-    { "player": "Wendy", "team": "MK Monarchs", "value": 2 },
-    { "player": "Bowser Jr", "team": "Narf Bullets", "value": 2 },
-    { "player": "Luigi", "team": "Comet Eons", "value": 2 },
-    { "player": "Kritter", "team": "Comet Eons", "value": 1 },
-    { "player": "Fire Bro", "team": "Narf Bullets", "value": 1 }
+    { "player": "Boomerang Bro", "team": "Nashville Knights", "value": 7 },
+    { "player": "Dry Bones", "team": "Comet Eons", "value": 5 },
+    { "player": "Hammer Bro", "team": "Comet Eons", "value": 4 },
+    { "player": "Donkey Kong", "team": "BRF Bombers", "value": 4 },
+    { "player": "Red Pianta", "team": "Lunar Eclypse", "value": 3 },
+    { "player": "King K. Rool", "team": "Egg Beaters", "value": 3 },
+    { "player": "Wendy", "team": "MK Monarchs", "value": 3 },
+    { "player": "Luigi", "team": "Comet Eons", "value": 3 },
+    { "player": "Birdo", "team": "Waffle Batters", "value": 2 },
+    { "player": "Funky Kong", "team": "MK Monarchs", "value": 2 }
+    
   ],
   "runs": [
+    { "player": "Dry Bones", "team": "Comet Eons", "value": 4 },
+    { "player": "Wiggler", "team": "Hopedogo Retrievers", "value": 3 },
+    { "player": "King K. Rool", "team": "Egg Beaters", "value": 3 },
     { "player": "Boomerang Bro", "team": "Nashville Knights", "value": 3 },
+    { "player": "Red Kritter", "team": "Lunar Eclypse", "value": 2 },
+    { "player": "Green Dry Bones", "team": "Comet Eons", "value": 2 },
+    { "player": "Tiny Kong", "team": "Nashville Knights", "value": 2 },
+    { "player": "Blitter", "team": "Nashville Knights", "value": 2 },
     { "player": "Kritter", "team": "Comet Eons", "value": 2 },
-    { "player": "Tiny Kong", "team": "MK Monarchs", "value": 2 },
-    { "player": "King K. Rool", "team": "Egg Beaters", "value": 0 },
-    { "player": "Diddy Kong", "team": "MK Monarchs", "value": 0 },
-    { "player": "Dry Bones", "team": "Comet Eons", "value": 0 },
-    { "player": "Bubbles", "team": "Nashville Knights", "value": 0 },
-    { "player": "Baby Peach", "team": "Narf Bullets", "value": 0 },
-    { "player": "Daisy", "team": "Egg Beaters", "value": 0 },
-    { "player": "Fire Bro", "team": "Narf Bullets", "value": 0 }
+    { "player": "King Boo", "team": "Hopedogo Retrievers","value": 2 }
   ],
   "strikeouts": [
     { "player": "Ronald McDonald", "team": "Dreary Lane", "value": 2 },
@@ -41,7 +42,7 @@
     { "player": "Funky Kong", "team": "MK Monarchs", "value": 1 },
     { "player": "Mario", "team": "MK Monarchs", "value": 1 },
     { "player": "Bowser Jr", "team": "Narf Bullets", "value": 1 },
-    { "player": "N/A", "team": "N/A", "value": null },
+    { "player": "Donkey Kong", "team": "MK Monarchs", "value": 1 },
     { "player": "N/A", "team": "N/A", "value": null },
     { "player": "N/A", "team": "N/A", "value": null },
     { "player": "N/A", "team": "N/A", "value": null },
