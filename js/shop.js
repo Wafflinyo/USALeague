@@ -28,6 +28,23 @@ function priceAfterDiscount(basePrice, disc) {
 }
 
 /**
+ * ✅ Convert icon paths to a GitHub Pages-safe public URL.
+ * - Keeps full https:// URLs as-is
+ * - Removes leading "/" so it doesn't break /USALeague/ base path
+ * - Resolves relative to site root (shop.js lives in /js/)
+ */
+function toPublicUrl(p) {
+  if (!p) return "";
+  if (/^https?:\/\//i.test(p)) return p;
+
+  // remove leading slashes so it works on GitHub Pages
+  const clean = String(p).replace(/^\/+/, "");
+
+  // shop.js is in /js/, so go up one level to the site root
+  return new URL(`../${clean}`, import.meta.url).href;
+}
+
+/**
  * One-time helper you can run to create/update shopItems docs from SHOP_ITEMS array.
  * You’ll click a "Seed Shop" button we’ll add to the modal.
  */
@@ -47,8 +64,10 @@ async function loadShopItemsFromFirestore() {
 }
 
 async function loadSale() {
+  // NOTE: This requires Firestore rules to allow read on /shopMeta/{docId}
   const saleSnap = await getDoc(doc(db, "shopMeta", "currentSale"));
   if (!saleSnap.exists()) return { discounts: {}, label: "No Sale Today" };
+
   const data = saleSnap.data();
   return {
     discounts: data.discounts || {},
@@ -71,7 +90,7 @@ function renderShopModal({ items, sale, onSelect, selectedId }) {
 
     return `
       <button class="shopTile ${selectedId === it.id ? "active" : ""}" data-item="${it.id}">
-        <img class="shopIcon" src="${it.icon}" alt="${it.name}">
+        <img class="shopIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
         <div class="shopTileName">${it.name}</div>
         <div class="shopTileMeta">
           <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
@@ -91,7 +110,7 @@ function renderShopModal({ items, sale, onSelect, selectedId }) {
     return `
       <div class="shopDetail">
         <div class="shopDetailTop">
-          <img class="shopDetailIcon" src="${selected.icon}" alt="${selected.name}">
+          <img class="shopDetailIcon" src="${toPublicUrl(selected.icon)}" alt="${selected.name}">
           <div>
             <div class="shopDetailName">${selected.name}</div>
             <div class="shopDetailTags">
@@ -149,7 +168,7 @@ function renderShopModal({ items, sale, onSelect, selectedId }) {
 }
 
 async function buySelectedItem(itemId) {
-  const uid = requireUid();
+  requireUid(); // ensures logged-in before calling function
   const fn = httpsCallable(getFunctions(), "buyShopItem");
   return fn({ itemId });
 }
@@ -167,7 +186,7 @@ function renderCollectionModal(uid) {
 
     const grid = items.length ? items.map(it => `
       <div class="invTile ${it.justBought ? "newGlow" : ""}">
-        <img class="invIcon" src="${it.icon}" alt="${it.name}">
+        <img class="invIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
         <div class="invName">${it.name}</div>
         <div class="invMeta">
           <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
@@ -200,6 +219,18 @@ export function initShopUI() {
   let sale = { discounts: {}, label: "Loading sale..." };
   let selectedId = null;
 
+  // ✅ keep the onSelect handler stable
+  function handleSelect(id) {
+    selectedId = id;
+    renderShopModal({
+      items: shopItems,
+      sale,
+      selectedId,
+      onSelect: handleSelect
+    });
+    wireBuyButton();
+  }
+
   async function refreshShop() {
     try {
       sale = await loadSale();
@@ -212,18 +243,14 @@ export function initShopUI() {
         items: shopItems,
         sale,
         selectedId,
-        onSelect: (id) => {
-          selectedId = id;
-          renderShopModal({ items: shopItems, sale, selectedId, onSelect: (x)=>{ selectedId=x; refreshShop(); } });
-          // re-wire buy button after re-render
-          wireBuyButton();
-        }
+        onSelect: handleSelect
       });
 
       wireBuyButton();
     } catch (e) {
       console.error(e);
-      $("giftShopCard").innerHTML = `<div class="smallNote">Shop failed to load: ${e.message}</div>`;
+      const card = $("giftShopCard");
+      if (card) card.innerHTML = `<div class="smallNote">Shop failed to load: ${e.message}</div>`;
     }
   }
 
@@ -260,7 +287,8 @@ export function initShopUI() {
         const uid = requireUid();
         renderCollectionModal(uid);
       } catch (e) {
-        $("collectionCard").innerHTML = `<div class="smallNote">${e.message}</div>`;
+        const card = $("collectionCard");
+        if (card) card.innerHTML = `<div class="smallNote">${e.message}</div>`;
       }
     };
   }

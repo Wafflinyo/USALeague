@@ -690,6 +690,11 @@ h2{
   .shopGrid{ grid-template-columns: repeat(3, minmax(120px, 1fr)); }
 }
 
+/* =========================
+   SHOP TILE TEXT OVERFLOW FIX
+   ========================== */
+
+/* Make every tile a predictable layout */
 .shopTile{
   border-radius: 14px;
   border: 2px solid rgba(255,214,102,0.35);
@@ -697,33 +702,76 @@ h2{
   padding: 10px;
   cursor: pointer;
   text-align:left;
+
+  /* ✅ key: fixed layout */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  /* keeps tiles even */
+  min-height: 210px;
+  overflow: hidden;
 }
 .shopTile:hover{ background: rgba(0,0,0,0.26); }
 .shopTile.active{ border-color: rgba(255,214,102,0.85); }
 
+/* Image gets its own fixed area */
 .shopIcon{
   width: 100%;
   height: 90px;
   object-fit: contain;
   display:block;
+  flex: 0 0 auto;
 }
 
+/* ✅ clamp name to 2 lines and never spill */
 .shopTileName{
-  margin-top: 6px;
+  margin-top: 2px;
   font-weight: 950;
   color: rgba(255,255,255,0.96);
+
+  /* hard stop overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* 2-line clamp */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
+  /* helps long words not blow up layout */
+  word-break: break-word;
+  line-height: 1.15;
+  min-height: calc(1.15em * 2); /* reserve space for 2 lines */
 }
 
+/* ✅ meta always stays at the bottom */
 .shopTileMeta{
+  margin-top: auto; /* pushes meta to bottom */
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap: 8px;
-  margin-top: 6px;
+
   font-size: 12px;
   font-weight: 900;
   color: rgba(255,255,255,0.80);
+
+  /* ensure it never wraps weirdly */
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
+
+/* Optional: keep price from shrinking too small */
+.shopTileMeta .price{
+  flex: 0 0 auto;
+}
+
+/* Optional: rarity chip doesn't wrap */
+.shopTileMeta .rarity{
+  flex: 0 0 auto;
+}
+
 
 .shopDetail{
   border-radius: 16px;
