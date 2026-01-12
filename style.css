@@ -536,4 +536,122 @@ h2{
   padding-top: 2px;
 }
 
+.shopLayout{
+  display:grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 12px;
+}
+@media (max-width: 900px){
+  .shopLayout{ grid-template-columns: 1fr; }
+}
+
+.shopGrid{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 900px){
+  .shopGrid{ grid-template-columns: repeat(3, minmax(130px, 1fr)); }
+}
+
+.shopItemCard{
+  text-align:left;
+  border-radius: 14px;
+  padding: 10px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.20);
+}
+
+.shopIcon{
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  display:block;
+  margin-bottom: 6px;
+}
+
+.shopNameRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 8px;
+}
+
+.saleBadge{
+  font-weight: 950;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,214,102,0.22);
+  border: 1px solid rgba(255,214,102,0.55);
+  color: rgba(255,255,255,0.96);
+}
+
+.shopItemName{ font-weight: 950; color: rgba(255,255,255,0.96); }
+.shopItemMeta{ margin-top: 4px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.80); }
+
+.shopDetails{
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.16);
+}
+.shopDetailsEmpty{
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0,0,0,0.12);
+  border: 1px dashed rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.75);
+  font-weight: 800;
+}
+
+.shopDetailsImg{
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  display:block;
+  margin-bottom: 10px;
+}
+.shopDetailsTitle{ font-weight: 950; color: rgba(255,255,255,0.96); font-size: 16px; }
+.shopDetailsRarity{ margin-top: 4px; font-weight: 900; color: rgba(255,255,255,0.80); }
+.shopDetailsDesc{ margin-top: 10px; font-weight: 800; color: rgba(255,255,255,0.86); line-height: 1.35; }
+.shopDetailsPrice{ margin-top: 10px; font-weight: 950; color: rgba(255,255,255,0.94); }
+
+.collectionGrid{
+  display:grid;
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 900px){
+  .collectionGrid{ grid-template-columns: repeat(3, minmax(120px, 1fr)); }
+}
+
+.invCard{
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.16);
+}
+.invIcon{
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  display:block;
+  margin-bottom: 8px;
+}
+.invName{ font-weight: 950; color: rgba(255,255,255,0.96); }
+.invMeta{ margin-top: 4px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.80); }
+
+.recentGlow{
+  box-shadow:
+    0 0 0 2px rgba(255,214,102,0.40),
+    0 0 18px rgba(255,214,102,0.28);
+  animation: recentPulse 1.4s ease-in-out infinite;
+}
+@keyframes recentPulse{
+  0%,100%{ filter: brightness(1); }
+  50%{ filter: brightness(1.06); }
+}
+
 
