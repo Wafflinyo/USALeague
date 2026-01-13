@@ -15,13 +15,19 @@ import {
 
 const el = (id) => document.getElementById(id);
 
+// -----------------------------
+// State
+// -----------------------------
 let SHOP_ITEMS_CACHE = [];
 let SALE_CACHE = { discounts: {}, label: "Loading sale..." };
 
 let unsubscribeCollection = null;
 let lastUid = null;
+let shopLoading = false;
 
-// ---------- helpers ----------
+// -----------------------------
+// Helpers
+// -----------------------------
 function requireUid() {
   const uid = window.__USA_UID__ || null;
   if (!uid) throw new Error("You must be logged in.");
@@ -37,6 +43,9 @@ function priceAfterDiscount(basePrice, disc) {
   return Math.max(1, Math.round(Number(basePrice || 0) * (1 - d)));
 }
 
+/**
+ * ✅ Convert icon paths to GitHub Pages-safe public URL.
+ */
 function toPublicUrl(p) {
   if (!p) return "";
   if (/^https?:\/\//i.test(p)) return p;
@@ -44,14 +53,28 @@ function toPublicUrl(p) {
   return new URL(`../${clean}`, import.meta.url).href;
 }
 
+function showShopMessage(msgHtml) {
+  const host = el("giftShopInline");
+  if (host) host.innerHTML = msgHtml;
+}
+
+function showCollectionMessage(msgHtml) {
+  const host = el("collectionInline");
+  if (host) host.innerHTML = msgHtml;
+}
+
+// -----------------------------
+// Firestore loads
+// -----------------------------
 async function loadShopItemsFromFirestore() {
   const snap = await getDocs(collection(db, "shopItems"));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 async function loadSale() {
+  // If you don’t have shopMeta/currentSale, this will simply show "No Sale Today"
   const saleSnap = await getDoc(doc(db, "shopMeta", "currentSale"));
-  if (!saleSnap.exists()) return { discounts: {}, label: "No Sale Today" };
+  if (!saleSnap.exists()) return { discounts: {}, label: "No Sale Today", dayKey: null };
 
   const data = saleSnap.data();
   return {
@@ -68,7 +91,9 @@ async function buySelectedItem(itemId) {
   return res.data;
 }
 
-// ---------- shared item detail modal ----------
+// -----------------------------
+// Shared item detail modal
+// -----------------------------
 function openItemDetailModal(html) {
   const modal = el("itemDetailModal");
   const card = el("itemDetailCard");
@@ -77,7 +102,7 @@ function openItemDetailModal(html) {
   card.innerHTML = html;
   modal.classList.remove("hidden");
 
-  // close button
+  // close buttons
   card.querySelectorAll("[data-close-itemmodal='1']").forEach(btn => {
     btn.addEventListener("click", () => modal.classList.add("hidden"));
   });
@@ -88,7 +113,9 @@ function openItemDetailModal(html) {
   }, { once: true });
 }
 
-// ---------- render shop inline ----------
+// -----------------------------
+// Render: Shop inline
+// -----------------------------
 function renderShopInline() {
   const host = el("giftShopInline");
   if (!host) return;
@@ -108,7 +135,7 @@ function renderShopInline() {
     const onSale = disc > 0;
 
     return `
-      <button class="shopTile" data-shop-item="${it.id}">
+      <button class="shopTile" type="button" data-shop-item="${it.id}">
         <img class="shopIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
         <div class="shopTileName">${it.name}</div>
         <div class="shopTileMeta">
@@ -124,7 +151,7 @@ function renderShopInline() {
     <div class="shopGrid">${grid}</div>
   `;
 
-  // click item -> open detail modal with BUY
+  // Click -> open detail modal with BUY button
   host.querySelectorAll("[data-shop-item]").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-shop-item");
@@ -139,7 +166,7 @@ function renderShopInline() {
       openItemDetailModal(`
         <div class="bigHeaderRow">
           <div style="font-weight:950;font-size:18px;">${it.name}</div>
-          <button class="ghostBtn" data-close-itemmodal="1">Close</button>
+          <button class="ghostBtn" type="button" data-close-itemmodal="1">Close</button>
         </div>
 
         <div class="shopDetail">
@@ -162,31 +189,33 @@ function renderShopInline() {
 
           <div class="shopDetailDesc">${it.desc || ""}</div>
 
-          <button class="primaryBtn" id="buyItemBtn">Buy</button>
+          <button class="primaryBtn" type="button" id="buyItemBtn">Buy</button>
           <div class="smallNote" id="buyMsg"></div>
         </div>
       `);
 
-      // wire buy
       const buyBtn = el("buyItemBtn");
       const buyMsg = el("buyMsg");
-      if (!buyBtn) return;
 
-      buyBtn.onclick = async () => {
-        if (buyMsg) buyMsg.textContent = "";
-        try {
-          const res = await buySelectedItem(it.id);
-          if (buyMsg) buyMsg.textContent = `✅ Purchased! (-${res.finalPrice} coins)`;
-        } catch (err) {
-          console.error(err);
-          if (buyMsg) buyMsg.textContent = `❌ ${err?.message || "Purchase failed."}`;
-        }
-      };
+      if (buyBtn) {
+        buyBtn.onclick = async () => {
+          if (buyMsg) buyMsg.textContent = "";
+          try {
+            const res = await buySelectedItem(it.id);
+            if (buyMsg) buyMsg.textContent = `✅ Purchased! (-${res.finalPrice} coins)`;
+          } catch (err) {
+            console.error(err);
+            if (buyMsg) buyMsg.textContent = `❌ ${err?.message || "Purchase failed."}`;
+          }
+        };
+      }
     });
   });
 }
 
-// ---------- render collection inline ----------
+// -----------------------------
+// Render: Collection inline
+// -----------------------------
 function renderCollectionInline(items) {
   const host = el("collectionInline");
   if (!host) return;
@@ -197,7 +226,7 @@ function renderCollectionInline(items) {
   }
 
   const grid = items.map(it => `
-    <button class="invTile ${it.justBought ? "recentGlow" : ""}" data-col-item="${it.id}">
+    <button class="invTile ${it.justBought ? "recentGlow" : ""}" type="button" data-col-item="${it.id}">
       <img class="invIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
       <div class="invName">${it.name}</div>
       <div class="invMeta">
@@ -209,7 +238,7 @@ function renderCollectionInline(items) {
 
   host.innerHTML = `<div class="invGrid">${grid}</div>`;
 
-  // click item -> open detail modal (NO BUY)
+  // Click -> open detail modal (no BUY button)
   host.querySelectorAll("[data-col-item]").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-col-item");
@@ -219,7 +248,7 @@ function renderCollectionInline(items) {
       openItemDetailModal(`
         <div class="bigHeaderRow">
           <div style="font-weight:950;font-size:18px;">${it.name}</div>
-          <button class="ghostBtn" data-close-itemmodal="1">Close</button>
+          <button class="ghostBtn" type="button" data-close-itemmodal="1">Close</button>
         </div>
 
         <div class="shopDetail">
@@ -244,73 +273,103 @@ function renderCollectionInline(items) {
 function attachCollectionListener(uid) {
   if (typeof unsubscribeCollection === "function") unsubscribeCollection();
 
+  // show a loading state immediately
+  showCollectionMessage(`<div class="smallNote">Loading collection...</div>`);
+
   const ref = collection(db, "users", uid, "collection");
   unsubscribeCollection = onSnapshot(ref, (snap) => {
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a,b) => (b.lastAcquiredAt?.seconds || 0) - (a.lastAcquiredAt?.seconds || 0));
+      .sort((a, b) => (b.lastAcquiredAt?.seconds || 0) - (a.lastAcquiredAt?.seconds || 0));
 
     renderCollectionInline(items);
   }, (err) => {
     console.error(err);
-    const host = el("collectionInline");
-    if (host) host.innerHTML = `<div class="smallNote">❌ Collection failed to load.</div>`;
+    showCollectionMessage(`<div class="smallNote">❌ Collection failed to load: ${err?.message || err}</div>`);
   });
 }
 
-// ---------- tab helpers ----------
+// -----------------------------
+// Tabs helpers
+// -----------------------------
 function isTabActive(group, tab) {
   const activeBtn = document.querySelector(`.tabBtn.active[data-tabgroup="${group}"]`);
   return activeBtn?.getAttribute("data-tab") === tab;
 }
 
-async function refreshShopIfVisible() {
-  // only refresh if the tab is visible to avoid wasted reads
-  if (!isTabActive("right", "giftshop")) return;
+async function refreshShopNow() {
+  if (shopLoading) return;
+  shopLoading = true;
+
+  showShopMessage(`<div class="smallNote">Shop loading...</div>`);
+
   try {
     SALE_CACHE = await loadSale();
+  } catch (e) {
+    console.warn("Sale load failed (ok if you don't use sales):", e);
+    SALE_CACHE = { discounts: {}, label: "No Sale Today", dayKey: null };
+  }
+
+  try {
     SHOP_ITEMS_CACHE = await loadShopItemsFromFirestore();
     renderShopInline();
   } catch (e) {
     console.error(e);
-    const host = el("giftShopInline");
-    if (host) host.innerHTML = `<div class="smallNote">❌ Shop failed to load.</div>`;
+    showShopMessage(`<div class="smallNote">❌ Shop failed to load: ${e?.message || e}</div>`);
+  } finally {
+    shopLoading = false;
   }
 }
 
-// ---------- public init ----------
+async function refreshShopIfVisible() {
+  if (!isTabActive("right", "giftshop")) return;
+  await refreshShopNow();
+}
+
+// -----------------------------
+// Public init
+// -----------------------------
 export function initShopUI() {
   console.log("✅ initShopUI loaded");
 
-  // initial placeholders so you don't see "nothing"
-  el("giftShopInline") && (el("giftShopInline").innerHTML = `<div class="smallNote">Shop loading...</div>`);
-  el("collectionInline") && (el("collectionInline").innerHTML = `<div class="smallNote">No Current Items</div>`);
+  // HARD fail if your HTML is missing required roots
+  if (!el("giftShopInline") || !el("collectionInline")) {
+    console.warn("shop.js: Missing #giftShopInline or #collectionInline in HTML.");
+    return;
+  }
 
-  // when user clicks the tabs, refresh the correct panel
-  document.addEventListener("click", (e) => {
+  // Placeholders so you never see blank
+  showShopMessage(`<div class="smallNote">Click “Mask’s Gift Shop” to load items.</div>`);
+  showCollectionMessage(`<div class="smallNote">No Current Items</div>`);
+
+  // When you click tabs, load their content
+  document.addEventListener("click", async (e) => {
     const btn = e.target?.closest?.(".tabBtn");
     if (!btn) return;
 
     const group = btn.getAttribute("data-tabgroup");
     const tab = btn.getAttribute("data-tab");
 
-    if (group === "right" && tab === "giftshop") refreshShopIfVisible();
+    if (group === "right" && tab === "giftshop") {
+      await refreshShopNow();
+    }
+
     if (group === "right" && tab === "collection") {
-      // collection renders from snapshot; just ensure listener exists
       const uid = window.__USA_UID__ || null;
-      if (uid) attachCollectionListener(uid);
-      else el("collectionInline").innerHTML = `<div class="smallNote">Log in to view your items.</div>`;
+      if (!uid) {
+        showCollectionMessage(`<div class="smallNote">Log in to view your items.</div>`);
+        return;
+      }
+      attachCollectionListener(uid);
     }
   });
 
-  // watch uid changes (login/logout)
+  // Watch uid changes (login/logout)
   setInterval(async () => {
     const uid = window.__USA_UID__ || null;
 
     // login changed
     if (uid && uid !== lastUid) {
       lastUid = uid;
-
-      // attach collection listener immediately
       attachCollectionListener(uid);
 
       // if shop tab visible, load it
@@ -323,11 +382,10 @@ export function initShopUI() {
       if (typeof unsubscribeCollection === "function") unsubscribeCollection();
       unsubscribeCollection = null;
 
-      const col = el("collectionInline");
-      if (col) col.innerHTML = `<div class="smallNote">Log in to view your items.</div>`;
+      showCollectionMessage(`<div class="smallNote">Log in to view your items.</div>`);
     }
   }, 500);
 
-  // if the shop tab is already active on load, pull it once
+  // If shop tab is already active, load it once
   refreshShopIfVisible();
 }
