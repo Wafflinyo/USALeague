@@ -116,7 +116,7 @@
           </div>
         </section>
 
-        <!-- VOTING + SHOP + COLLECTION (✅ Cafe removed) -->
+        <!-- VOTING + SHOP + COLLECTION -->
         <section class="panel">
           <div class="panelHeader">
             <h2>Voting & Shops</h2>
@@ -134,18 +134,18 @@
             <div class="smallNote" id="voteLockNote"></div>
           </div>
 
+          <!-- ✅ Shop renders inline now (no button) -->
           <div class="tabContent" data-tabgroup="right" data-tab="giftshop">
-            <button class="primaryBtn" id="openGiftShopBtn">Enter Gift Shop</button>
-            <div class="smallNote">Purchase items → go to Collection (stack rules apply where relevant).</div>
+            <div id="giftShopInline"></div>
           </div>
 
+          <!-- ✅ Collection renders inline now (no button) -->
           <div class="tabContent" data-tabgroup="right" data-tab="collection">
-            <button class="primaryBtn" id="openCollectionBtn">Open Collection</button>
-            <div class="smallNote">Recently obtained items glow with a gold trim.</div>
+            <div id="collectionInline"></div>
           </div>
         </section>
 
-        <!-- LEAGUE LEADERS (✅ BAVG + MVP removed) -->
+        <!-- LEAGUE LEADERS -->
         <section class="panel">
           <div class="panelHeader">
             <h2>League Leaders</h2>
@@ -229,7 +229,12 @@
     </div>
   </div>
 
-  <!-- BIG MODALS -->
+  <!-- ✅ One shared item details overlay (shop + collection) -->
+  <div class="modal hidden" id="itemModal">
+    <div class="bigCard" id="itemCard"></div>
+  </div>
+
+  <!-- BIG MODALS (kept if other scripts still use them) -->
   <div class="modal hidden" id="giftShopModal"><div class="bigCard" id="giftShopCard"></div></div>
   <div class="modal hidden" id="collectionModal"><div class="bigCard" id="collectionCard"></div></div>
   <div class="modal hidden" id="slotsModal"><div class="bigCard" id="slotsCard"></div></div>
