@@ -5,48 +5,38 @@ import {
   doc,
   getDoc,
   getDocs,
-  onSnapshot,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
   getFunctions,
-  httpsCallable,
+  httpsCallable
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-const $ = (id) => document.getElementById(id);
+const el = (id) => document.getElementById(id);
 
-const SEASON_ID = "season1"; // not required here but keeping your convention
+let SHOP_ITEMS_CACHE = [];
+let SALE_CACHE = { discounts: {}, label: "Loading sale..." };
 
+let unsubscribeCollection = null;
+let lastUid = null;
+
+// ---------- helpers ----------
 function requireUid() {
   const uid = window.__USA_UID__ || null;
   if (!uid) throw new Error("You must be logged in.");
   return uid;
 }
 
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 function rarityLabel(r) {
-  return String(r || "common").toUpperCase();
+  return (r || "common").toUpperCase();
 }
 
 function priceAfterDiscount(basePrice, disc) {
   const d = Math.max(0, Math.min(Number(disc || 0), 0.25));
-  return Math.max(1, Math.round(Number(basePrice) * (1 - d)));
+  return Math.max(1, Math.round(Number(basePrice || 0) * (1 - d)));
 }
 
-/**
- * Convert icon paths to GitHub Pages-safe URL.
- * - Keeps full https URLs as-is
- * - Removes leading "/" so it doesn't break /REPO/ base path
- * - Resolves relative to site root (shop.js is in /js/)
- */
 function toPublicUrl(p) {
   if (!p) return "";
   if (/^https?:\/\//i.test(p)) return p;
@@ -54,134 +44,73 @@ function toPublicUrl(p) {
   return new URL(`../${clean}`, import.meta.url).href;
 }
 
-// -------------------------
-// Firestore loads
-// -------------------------
 async function loadShopItemsFromFirestore() {
   const snap = await getDocs(collection(db, "shopItems"));
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 async function loadSale() {
   const saleSnap = await getDoc(doc(db, "shopMeta", "currentSale"));
-  if (!saleSnap.exists()) return { discounts: {}, label: "No Sale Today", dayKey: null };
+  if (!saleSnap.exists()) return { discounts: {}, label: "No Sale Today" };
 
-  const data = saleSnap.data() || {};
+  const data = saleSnap.data();
   return {
     discounts: data.discounts || {},
     label: data.label || "Daily Sale",
-    dayKey: data.dayKey || null,
+    dayKey: data.dayKey || null
   };
 }
 
 async function buySelectedItem(itemId) {
   requireUid();
   const fn = httpsCallable(getFunctions(), "buyShopItem");
-  return fn({ itemId });
+  const res = await fn({ itemId });
+  return res.data;
 }
 
-// -------------------------
-// Shared Item Details Modal
-// -------------------------
-function openItemModal({ mode, item, sale }) {
-  const modal = $("itemDetailModal");
-  const card = $("itemDetailCard");
+// ---------- shared item detail modal ----------
+function openItemDetailModal(html) {
+  const modal = el("itemDetailModal");
+  const card = el("itemDetailCard");
   if (!modal || !card) return;
 
-  const isShop = mode === "shop";
-  const name = escapeHtml(item?.name || "Item");
-  const desc = escapeHtml(item?.desc || "");
-  const icon = toPublicUrl(item?.icon || "");
-  const rarity = String(item?.rarity || "common");
-  const stack = item?.stackable ? `Stackable (max ${item?.maxStack || 10})` : "Not stackable";
-
-  let priceLine = "";
-  if (isShop) {
-    const disc = sale?.discounts?.[item.id] || 0;
-    const base = Number(item.basePrice || 0);
-    const finalP = priceAfterDiscount(base, disc);
-    const onSale = disc > 0;
-
-    priceLine = onSale
-      ? `Price: <s>${base}</s> <b>${finalP}</b> (-${Math.round(disc * 100)}%)`
-      : `Price: <b>${base}</b>`;
-  } else {
-    const qty = Number(item.qty || 1);
-    priceLine = `Owned: <b>x${qty}</b>`;
-  }
-
-  card.innerHTML = `
-    <div style="display:flex; align-items:flex-start; gap:12px;">
-      <img src="${icon}" alt="${name}" style="width:120px;height:120px;object-fit:contain;border-radius:14px;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.16);padding:10px;">
-      <div style="flex:1;">
-        <div style="font-weight:950; font-size:18px; color:rgba(255,255,255,0.96);">${name}</div>
-        <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <span class="rarity ${rarity}">${rarityLabel(rarity)}</span>
-          <span style="font-weight:900; color:rgba(255,255,255,0.85);">${escapeHtml(stack)}</span>
-        </div>
-      </div>
-    </div>
-
-    <div style="margin-top:12px; font-weight:800; color:rgba(255,255,255,0.88); line-height:1.35;">
-      ${desc || (isShop ? "No description." : "No description.")}
-    </div>
-
-    <div style="margin-top:12px; font-weight:950; color:rgba(255,255,255,0.94);">
-      ${priceLine}
-    </div>
-
-    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-      ${isShop ? `<button class="primaryBtn" id="modalBuyBtn">Buy</button>` : ``}
-      <button class="ghostBtn" id="modalCloseBtn">Close</button>
-      ${isShop ? `<div class="smallNote" id="modalBuyMsg" style="margin-left:2px;"></div>` : ``}
-    </div>
-  `;
-
+  card.innerHTML = html;
   modal.classList.remove("hidden");
 
-  // close handlers
-  $("modalCloseBtn")?.addEventListener("click", () => modal.classList.add("hidden"));
+  // close button
+  card.querySelectorAll("[data-close-itemmodal='1']").forEach(btn => {
+    btn.addEventListener("click", () => modal.classList.add("hidden"));
+  });
+
+  // backdrop closes
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.classList.add("hidden");
   }, { once: true });
-
-  // buy handler (shop only)
-  if (isShop) {
-    $("modalBuyBtn")?.addEventListener("click", async () => {
-      const msg = $("modalBuyMsg");
-      if (msg) msg.textContent = "";
-      try {
-        const res = await buySelectedItem(item.id);
-        if (msg) msg.textContent = `✅ Purchased! (-${res.data.finalPrice} coins)`;
-      } catch (err) {
-        console.error(err);
-        if (msg) msg.textContent = `❌ ${err?.message || "Purchase failed."}`;
-      }
-    });
-  }
 }
 
-// -------------------------
-// Render Shop inside tab
-// -------------------------
-function renderShopIntoTab({ rootEl, items, sale }) {
-  const saleLine = `${escapeHtml(sale?.label || "Sale")}${sale?.dayKey ? ` • ${escapeHtml(sale.dayKey)}` : ""}`;
+// ---------- render shop inline ----------
+function renderShopInline() {
+  const host = el("giftShopInline");
+  if (!host) return;
+
+  const items = SHOP_ITEMS_CACHE || [];
+  const sale = SALE_CACHE || { discounts: {}, label: "No Sale Today" };
 
   if (!items.length) {
-    rootEl.innerHTML = `<div class="smallNote">No shop items found. (Check Firestore: /shopItems read access)</div>`;
+    host.innerHTML = `<div class="smallNote">No shop items found.</div>`;
     return;
   }
 
-  const gridHtml = items.map((it) => {
-    const disc = sale?.discounts?.[it.id] || 0;
+  const grid = items.map(it => {
+    const disc = sale.discounts?.[it.id] || 0;
     const base = Number(it.basePrice || 0);
     const finalP = priceAfterDiscount(base, disc);
     const onSale = disc > 0;
 
     return `
-      <button class="shopTile" data-item="${escapeHtml(it.id)}" type="button">
-        <img class="shopIcon" src="${toPublicUrl(it.icon)}" alt="${escapeHtml(it.name)}">
-        <div class="shopTileName">${escapeHtml(it.name)}</div>
+      <button class="shopTile" data-shop-item="${it.id}">
+        <img class="shopIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
+        <div class="shopTileName">${it.name}</div>
         <div class="shopTileMeta">
           <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
           <span class="price">${onSale ? `<s>${base}</s> ${finalP}` : `${base}`}</span>
@@ -190,129 +119,215 @@ function renderShopIntoTab({ rootEl, items, sale }) {
     `;
   }).join("");
 
-  rootEl.innerHTML = `
-    <div class="panelNote">Mask’s Gift Shop</div>
-    <div class="smallNote">${saleLine}</div>
-    <div class="shopGrid" style="margin-top:10px;">${gridHtml}</div>
+  host.innerHTML = `
+    <div class="smallNote">${sale.label || "Sale"}${sale.dayKey ? ` • ${sale.dayKey}` : ""}</div>
+    <div class="shopGrid">${grid}</div>
   `;
 
-  rootEl.querySelectorAll(".shopTile").forEach((btn) => {
+  // click item -> open detail modal with BUY
+  host.querySelectorAll("[data-shop-item]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const id = btn.dataset.item;
-      const item = items.find((x) => x.id === id);
-      if (!item) return;
-      openItemModal({ mode: "shop", item, sale });
+      const id = btn.getAttribute("data-shop-item");
+      const it = items.find(x => x.id === id);
+      if (!it) return;
+
+      const disc = sale.discounts?.[it.id] || 0;
+      const base = Number(it.basePrice || 0);
+      const finalP = priceAfterDiscount(base, disc);
+      const onSale = disc > 0;
+
+      openItemDetailModal(`
+        <div class="bigHeaderRow">
+          <div style="font-weight:950;font-size:18px;">${it.name}</div>
+          <button class="ghostBtn" data-close-itemmodal="1">Close</button>
+        </div>
+
+        <div class="shopDetail">
+          <div class="shopDetailTop">
+            <img class="shopDetailIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
+            <div>
+              <div class="shopDetailName">${it.name}</div>
+              <div class="shopDetailTags">
+                <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
+                <span class="rarity">${it.stackable ? `STACKABLE (max ${it.maxStack || 10})` : "NOT STACKABLE"}</span>
+              </div>
+              <div class="shopDetailPrice" style="margin-top:10px;">
+                ${onSale
+                  ? `Price: <s>${base}</s> <b>${finalP}</b> (-${Math.round(disc * 100)}%)`
+                  : `Price: <b>${base}</b>`
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="shopDetailDesc">${it.desc || ""}</div>
+
+          <button class="primaryBtn" id="buyItemBtn">Buy</button>
+          <div class="smallNote" id="buyMsg"></div>
+        </div>
+      `);
+
+      // wire buy
+      const buyBtn = el("buyItemBtn");
+      const buyMsg = el("buyMsg");
+      if (!buyBtn) return;
+
+      buyBtn.onclick = async () => {
+        if (buyMsg) buyMsg.textContent = "";
+        try {
+          const res = await buySelectedItem(it.id);
+          if (buyMsg) buyMsg.textContent = `✅ Purchased! (-${res.finalPrice} coins)`;
+        } catch (err) {
+          console.error(err);
+          if (buyMsg) buyMsg.textContent = `❌ ${err?.message || "Purchase failed."}`;
+        }
+      };
     });
   });
 }
 
-// -------------------------
-// Render Collection inside tab
-// -------------------------
-function renderCollectionIntoTab({ rootEl, ownedItems }) {
-  if (!ownedItems.length) {
-    rootEl.innerHTML = `<div class="smallNote">No Current Items</div>`;
+// ---------- render collection inline ----------
+function renderCollectionInline(items) {
+  const host = el("collectionInline");
+  if (!host) return;
+
+  if (!items || !items.length) {
+    host.innerHTML = `<div class="smallNote">No Current Items</div>`;
     return;
   }
 
-  const grid = ownedItems.map((it) => `
-    <button class="invTile ${it.justBought ? "recentGlow" : ""}" data-item="${escapeHtml(it.id)}" type="button">
-      <img class="invIcon" src="${toPublicUrl(it.icon)}" alt="${escapeHtml(it.name)}">
-      <div class="invName">${escapeHtml(it.name)}</div>
+  const grid = items.map(it => `
+    <button class="invTile ${it.justBought ? "recentGlow" : ""}" data-col-item="${it.id}">
+      <img class="invIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
+      <div class="invName">${it.name}</div>
       <div class="invMeta">
         <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
-        <span class="qty">x${Number(it.qty || 1)}</span>
+        <span class="qty">x${it.qty || 1}</span>
       </div>
     </button>
   `).join("");
 
-  rootEl.innerHTML = `
-    <div class="panelNote">Collection</div>
-    <div class="invGrid" style="margin-top:10px;">${grid}</div>
-  `;
+  host.innerHTML = `<div class="invGrid">${grid}</div>`;
 
-  rootEl.querySelectorAll(".invTile").forEach((btn) => {
+  // click item -> open detail modal (NO BUY)
+  host.querySelectorAll("[data-col-item]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const id = btn.dataset.item;
-      const item = ownedItems.find((x) => x.id === id);
-      if (!item) return;
-      openItemModal({ mode: "collection", item, sale: null });
+      const id = btn.getAttribute("data-col-item");
+      const it = items.find(x => x.id === id);
+      if (!it) return;
+
+      openItemDetailModal(`
+        <div class="bigHeaderRow">
+          <div style="font-weight:950;font-size:18px;">${it.name}</div>
+          <button class="ghostBtn" data-close-itemmodal="1">Close</button>
+        </div>
+
+        <div class="shopDetail">
+          <div class="shopDetailTop">
+            <img class="shopDetailIcon" src="${toPublicUrl(it.icon)}" alt="${it.name}">
+            <div>
+              <div class="shopDetailName">${it.name}</div>
+              <div class="shopDetailTags">
+                <span class="rarity ${it.rarity || "common"}">${rarityLabel(it.rarity)}</span>
+                <span class="rarity">OWNED: x${it.qty || 1}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shopDetailDesc">${it.desc || ""}</div>
+        </div>
+      `);
     });
   });
 }
 
-// -------------------------
-// Init (runs once)
-// -------------------------
+function attachCollectionListener(uid) {
+  if (typeof unsubscribeCollection === "function") unsubscribeCollection();
+
+  const ref = collection(db, "users", uid, "collection");
+  unsubscribeCollection = onSnapshot(ref, (snap) => {
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a,b) => (b.lastAcquiredAt?.seconds || 0) - (a.lastAcquiredAt?.seconds || 0));
+
+    renderCollectionInline(items);
+  }, (err) => {
+    console.error(err);
+    const host = el("collectionInline");
+    if (host) host.innerHTML = `<div class="smallNote">❌ Collection failed to load.</div>`;
+  });
+}
+
+// ---------- tab helpers ----------
+function isTabActive(group, tab) {
+  const activeBtn = document.querySelector(`.tabBtn.active[data-tabgroup="${group}"]`);
+  return activeBtn?.getAttribute("data-tab") === tab;
+}
+
+async function refreshShopIfVisible() {
+  // only refresh if the tab is visible to avoid wasted reads
+  if (!isTabActive("right", "giftshop")) return;
+  try {
+    SALE_CACHE = await loadSale();
+    SHOP_ITEMS_CACHE = await loadShopItemsFromFirestore();
+    renderShopInline();
+  } catch (e) {
+    console.error(e);
+    const host = el("giftShopInline");
+    if (host) host.innerHTML = `<div class="smallNote">❌ Shop failed to load.</div>`;
+  }
+}
+
+// ---------- public init ----------
 export function initShopUI() {
-  console.log("✅ initShopUI loaded (tab render mode)");
+  console.log("✅ initShopUI loaded");
 
-  const shopRoot = $("giftShopRoot");
-  const colRoot = $("collectionRoot");
+  // initial placeholders so you don't see "nothing"
+  el("giftShopInline") && (el("giftShopInline").innerHTML = `<div class="smallNote">Shop loading...</div>`);
+  el("collectionInline") && (el("collectionInline").innerHTML = `<div class="smallNote">No Current Items</div>`);
 
-  if (!shopRoot || !colRoot) {
-    console.warn("shop.js: Missing #giftShopRoot or #collectionRoot in HTML.");
-    return;
-  }
+  // when user clicks the tabs, refresh the correct panel
+  document.addEventListener("click", (e) => {
+    const btn = e.target?.closest?.(".tabBtn");
+    if (!btn) return;
 
-  let shopItems = [];
-  let sale = { discounts: {}, label: "Loading sale...", dayKey: null };
-  let unsubCollection = null;
+    const group = btn.getAttribute("data-tabgroup");
+    const tab = btn.getAttribute("data-tab");
 
-  async function refreshShop() {
-    try {
-      sale = await loadSale();
-      shopItems = await loadShopItemsFromFirestore();
-      renderShopIntoTab({ rootEl: shopRoot, items: shopItems, sale });
-    } catch (e) {
-      console.error("Shop load failed:", e);
-      shopRoot.innerHTML = `<div class="smallNote">Shop failed to load: ${escapeHtml(e.message || e)}</div>`;
+    if (group === "right" && tab === "giftshop") refreshShopIfVisible();
+    if (group === "right" && tab === "collection") {
+      // collection renders from snapshot; just ensure listener exists
+      const uid = window.__USA_UID__ || null;
+      if (uid) attachCollectionListener(uid);
+      else el("collectionInline").innerHTML = `<div class="smallNote">Log in to view your items.</div>`;
     }
-  }
+  });
 
-  function watchCollection(uid) {
-    // stop old listener
-    if (unsubCollection) unsubCollection();
-    unsubCollection = null;
-
-    const colRef = collection(db, "users", uid, "collection");
-    unsubCollection = onSnapshot(colRef, (snap) => {
-      const owned = snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .sort((a, b) => (b.lastAcquiredAt?.seconds || 0) - (a.lastAcquiredAt?.seconds || 0));
-
-      renderCollectionIntoTab({ rootEl: colRoot, ownedItems: owned });
-    }, (err) => {
-      console.error("Collection snapshot error:", err);
-      colRoot.innerHTML = `<div class="smallNote">Collection failed to load.</div>`;
-    });
-  }
-
-  function renderLoggedOutState() {
-    shopRoot.innerHTML = `<div class="smallNote">Login required to view the shop.</div>`;
-    colRoot.innerHTML = `<div class="smallNote">Login required to view your collection.</div>`;
-    if (unsubCollection) unsubCollection();
-    unsubCollection = null;
-  }
-
-  // initial
-  if (!window.__USA_UID__) renderLoggedOutState();
-  refreshShop();
-  if (window.__USA_UID__) watchCollection(window.__USA_UID__);
-
-  // if user logs in/out later (matches your existing style)
-  let lastUid = window.__USA_UID__ || null;
-  setInterval(() => {
+  // watch uid changes (login/logout)
+  setInterval(async () => {
     const uid = window.__USA_UID__ || null;
-    if (uid === lastUid) return;
-    lastUid = uid;
 
-    if (!uid) {
-      renderLoggedOutState();
-      return;
+    // login changed
+    if (uid && uid !== lastUid) {
+      lastUid = uid;
+
+      // attach collection listener immediately
+      attachCollectionListener(uid);
+
+      // if shop tab visible, load it
+      await refreshShopIfVisible();
     }
 
-    refreshShop();
-    watchCollection(uid);
+    // logout
+    if (!uid && lastUid) {
+      lastUid = null;
+      if (typeof unsubscribeCollection === "function") unsubscribeCollection();
+      unsubscribeCollection = null;
+
+      const col = el("collectionInline");
+      if (col) col.innerHTML = `<div class="smallNote">Log in to view your items.</div>`;
+    }
   }, 500);
+
+  // if the shop tab is already active on load, pull it once
+  refreshShopIfVisible();
 }
