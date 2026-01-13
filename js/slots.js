@@ -1,10 +1,4 @@
 // js/slots.js
-import { db } from "./firebase.js";
-import {
-  getDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 import {
   getFunctions,
   httpsCallable
@@ -40,54 +34,6 @@ async function getTeamLogoMap() {
   return map;
 }
 
-function renderSlotsUI() {
-  const card = el("slotsCard");
-  if (!card) return;
-
-  card.innerHTML = `
-    <div class="bigHeaderRow">
-      <div>
-        <div style="font-weight:950;font-size:18px;">Ploopy’s Slick Slots</div>
-        <div class="smallNote">Costs 1 coin • Reels stop one-by-one • Jackpot doubles with streak</div>
-      </div>
-      <div class="bigHeaderBtns">
-        <button class="ghostBtn" id="closeSlotsBtn">Close</button>
-      </div>
-    </div>
-
-    <div class="slotMachine" id="slotMachine">
-      <div class="slotCols">
-
-        <div class="slotCol" id="slotCol1">
-          <div class="slotWindow" id="slotWin1">
-            <img class="slotIcon" id="slotIcon1" alt="Reel 1" />
-          </div>
-        </div>
-
-        <div class="slotCol" id="slotCol2">
-          <div class="slotWindow" id="slotWin2">
-            <img class="slotIcon" id="slotIcon2" alt="Reel 2" />
-          </div>
-        </div>
-
-        <div class="slotCol" id="slotCol3">
-          <div class="slotWindow" id="slotWin3">
-            <img class="slotIcon" id="slotIcon3" alt="Reel 3" />
-          </div>
-        </div>
-
-      </div>
-
-      <div class="slotActions">
-        <button class="primaryBtn" id="spinSlotsBtn">SPIN (1 Coin)</button>
-        <div class="smallNote" id="slotsMsg"></div>
-      </div>
-    </div>
-  `;
-
-  el("closeSlotsBtn")?.addEventListener("click", () => el("slotsModal")?.classList.add("hidden"));
-}
-
 function clearWinFx() {
   const machine = el("slotMachine");
   const cols = [el("slotCol1"), el("slotCol2"), el("slotCol3")];
@@ -111,26 +57,21 @@ function applyWinFx(isWin) {
   cols.forEach(c => c?.classList.add("isWin"));
   icons.forEach(i => i?.classList.add("winPulse"));
 
-  // auto remove after a bit
   setTimeout(() => clearWinFx(), 1500);
 }
 
-// Simple “spin” animation: rapidly swap images until stop time
-function startReelSpinner(iconEl, pool, ms = 900) {
+// Simple “spin” animation
+function startReelSpinner(iconEl, pool) {
   let alive = true;
-  let t = 0;
 
   const tick = () => {
     if (!alive) return;
-    t += 1;
     const pick = pool[Math.floor(Math.random() * pool.length)];
     if (pick) iconEl.src = pick.icon;
     requestAnimationFrame(tick);
   };
 
   tick();
-
-  // stop function
   return () => { alive = false; };
 }
 
@@ -140,34 +81,72 @@ async function callPlaySlots(symbols) {
   return res.data;
 }
 
+/**
+ * ✅ Render the slots UI into a host element (inline)
+ */
+function renderSlotsUI(hostEl) {
+  hostEl.innerHTML = `
+    <div class="slotMachine" id="slotMachine">
+      <div class="bigHeaderRow" style="margin-bottom:10px;">
+        <div>
+          <div style="font-weight:950;font-size:18px;">Ploopy’s Slick Slots</div>
+          <div class="smallNote">Costs 1 coin • Reels stop one-by-one • Jackpot doubles with streak</div>
+        </div>
+      </div>
+
+      <div class="slotCols">
+        <div class="slotCol" id="slotCol1">
+          <div class="slotWindow" id="slotWin1">
+            <img class="slotIcon" id="slotIcon1" alt="Reel 1" />
+          </div>
+        </div>
+
+        <div class="slotCol" id="slotCol2">
+          <div class="slotWindow" id="slotWin2">
+            <img class="slotIcon" id="slotIcon2" alt="Reel 2" />
+          </div>
+        </div>
+
+        <div class="slotCol" id="slotCol3">
+          <div class="slotWindow" id="slotWin3">
+            <img class="slotIcon" id="slotIcon3" alt="Reel 3" />
+          </div>
+        </div>
+      </div>
+
+      <div class="slotActions">
+        <button class="primaryBtn" id="spinSlotsBtn">SPIN (1 Coin)</button>
+        <div class="smallNote" id="slotsMsg"></div>
+      </div>
+    </div>
+  `;
+}
+
 export function initSlotsUI() {
-  console.log("✅ initSlotsUI loaded");
+  console.log("✅ initSlotsUI loaded (inline)");
 
-  const openBtn = el("openSlotsBtn");
-  const modal = el("slotsModal");
+  const host = el("slotsInline");
+  if (!host) {
+    console.warn("⚠️ Missing #slotsInline in HTML.");
+    return;
+  }
 
-  if (!openBtn || !modal) return;
+  renderSlotsUI(host);
 
-  openBtn.onclick = async () => {
-    modal.classList.remove("hidden");
-    renderSlotsUI();
+  const spinBtn = el("spinSlotsBtn");
+  const msg = el("slotsMsg");
 
-    // backdrop click closes
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.classList.add("hidden");
-    }, { once: true });
+  if (!spinBtn) return;
 
-    // wire spin
-    const spinBtn = el("spinSlotsBtn");
-    const msg = el("slotsMsg");
-
-    // build symbol pool from standings.json (all teams)
+  // Load symbols once
+  (async () => {
     let logoMap;
     try {
       logoMap = await getTeamLogoMap();
     } catch (e) {
       console.error(e);
       if (msg) msg.textContent = "❌ Could not load team logos (standings.json).";
+      spinBtn.disabled = true;
       return;
     }
 
@@ -177,13 +156,13 @@ export function initSlotsUI() {
       icon: logoMap[name]
     }));
 
-    // fallback
     if (!symbols.length) {
       if (msg) msg.textContent = "❌ No teams found in standings.json.";
+      spinBtn.disabled = true;
       return;
     }
 
-    // initial images
+    // Set initial images
     el("slotIcon1").src = symbols[0].icon;
     el("slotIcon2").src = symbols[1]?.icon || symbols[0].icon;
     el("slotIcon3").src = symbols[2]?.icon || symbols[0].icon;
@@ -202,7 +181,6 @@ export function initSlotsUI() {
 
       if (spinning) return;
       spinning = true;
-
       spinBtn.disabled = true;
       if (msg) msg.textContent = "Spinning...";
 
@@ -214,12 +192,10 @@ export function initSlotsUI() {
       const win2 = el("slotWin2");
       const win3 = el("slotWin3");
 
-      // start all spinners
       const stop1 = startReelSpinner(icon1, symbols);
       const stop2 = startReelSpinner(icon2, symbols);
       const stop3 = startReelSpinner(icon3, symbols);
 
-      // call server result immediately (secure)
       let result;
       try {
         result = await callPlaySlots(symbols);
@@ -232,13 +208,9 @@ export function initSlotsUI() {
         return;
       }
 
-      // result.symbols is [s1,s2,s3] from the function
       const [s1, s2, s3] = result.symbols || [];
-
-      // Stop one-by-one with a little “stopping” highlight
       const stopDelay = (ms) => new Promise(r => setTimeout(r, ms));
 
-      // Reel 1 stop
       await stopDelay(750);
       win1?.classList.add("isStopping");
       await stopDelay(200);
@@ -246,7 +218,6 @@ export function initSlotsUI() {
       if (s1?.icon) icon1.src = s1.icon;
       win1?.classList.remove("isStopping");
 
-      // Reel 2 stop
       await stopDelay(650);
       win2?.classList.add("isStopping");
       await stopDelay(200);
@@ -254,7 +225,6 @@ export function initSlotsUI() {
       if (s2?.icon) icon2.src = s2.icon;
       win2?.classList.remove("isStopping");
 
-      // Reel 3 stop
       await stopDelay(600);
       win3?.classList.add("isStopping");
       await stopDelay(200);
@@ -262,7 +232,6 @@ export function initSlotsUI() {
       if (s3?.icon) icon3.src = s3.icon;
       win3?.classList.remove("isStopping");
 
-      // Win effects + message
       if (result.isWin) {
         applyWinFx(true);
         if (msg) msg.textContent = `✅ WIN! +${result.payout} coins (streak: ${result.streak})`;
@@ -273,10 +242,5 @@ export function initSlotsUI() {
       spinning = false;
       spinBtn.disabled = false;
     };
-  };
-
-  // If modal already wired, keep backdrop behavior:
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.classList.add("hidden");
-  });
+  })();
 }
