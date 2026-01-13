@@ -40,20 +40,17 @@ async function initStaticPanels() {
 
 // -----------------------------
 // Watch logged-in user (from window.__USA_UID__)
-// Your index.html sets window.__USA_UID__ on login.
 // -----------------------------
 let unsubscribeUser = null;
 
 function attachUserListener(uid) {
-  // clear old listener if switching accounts
   if (typeof unsubscribeUser === "function") unsubscribeUser();
 
   const userRef = doc(db, "users", uid);
   unsubscribeUser = onSnapshot(userRef, (snap) => {
     if (!snap.exists()) return;
-    const u = snap.data();
+    const u = snap.data() || {};
 
-    // HUD updates
     const username = u.username ?? "User";
     const coins = u.coins ?? 0;
     const correct = u.correctPicks ?? 0;
@@ -72,23 +69,29 @@ function attachUserListener(uid) {
 }
 
 function watchUidAndAttachListener() {
-  // If user already logged in before app.js loads
   if (window.__USA_UID__) attachUserListener(window.__USA_UID__);
 
-  // If user logs in later, index.html sets this. We'll poll lightly.
   let lastUid = window.__USA_UID__ || null;
 
   setInterval(() => {
     const uid = window.__USA_UID__ || null;
+
     if (uid && uid !== lastUid) {
       lastUid = uid;
       attachUserListener(uid);
+      return;
     }
+
     if (!uid && lastUid) {
-      // logged out
       lastUid = null;
       if (typeof unsubscribeUser === "function") unsubscribeUser();
       unsubscribeUser = null;
+
+      // optional: clear HUD when logged out
+      el("hudUsername") && (el("hudUsername").textContent = "...");
+      el("hudCoins") && (el("hudCoins").textContent = "0");
+      el("hudVoteCount") && (el("hudVoteCount").textContent = "0");
+      el("hudVotePct") && (el("hudVotePct").textContent = "0%");
     }
   }, 500);
 }
@@ -96,13 +99,15 @@ function watchUidAndAttachListener() {
 // -----------------------------
 // Boot
 // -----------------------------
-initTabs();         // makes all your .tabBtn switch .tabContent
-initStaticPanels(); // standings/leaders/logs/ticker text
+initTabs();
+initStaticPanels();
 
-// Live features (they can read window.__USA_UID__ when needed)
 initVoting();
 initPredictionLeaders();
+
+// ✅ Inline shop/collection renderer (handles login changes itself)
 initShopUI();
+
 initSlotsUI();
 initSuggestions();
 

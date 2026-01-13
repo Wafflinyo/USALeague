@@ -134,13 +134,15 @@
             <div class="smallNote" id="voteLockNote"></div>
           </div>
 
-          <!-- ✅ Shop renders inline now (no button) -->
+          <!-- ✅ Shop renders inline now -->
           <div class="tabContent" data-tabgroup="right" data-tab="giftshop">
+            <div class="smallNote">Click an item to view it bigger and buy it.</div>
             <div id="giftShopInline"></div>
           </div>
 
-          <!-- ✅ Collection renders inline now (no button) -->
+          <!-- ✅ Collection renders inline now -->
           <div class="tabContent" data-tabgroup="right" data-tab="collection">
+            <div class="smallNote">Click an item to view it bigger.</div>
             <div id="collectionInline"></div>
           </div>
         </section>
@@ -229,14 +231,12 @@
     </div>
   </div>
 
-  <!-- ✅ One shared item details overlay (shop + collection) -->
-  <div class="modal hidden" id="itemModal">
-    <div class="bigCard" id="itemCard"></div>
+  <!-- ✅ Shared Item Details Modal (shop + collection) -->
+  <div class="modal hidden" id="itemDetailModal">
+    <div class="modalCard" id="itemDetailCard"></div>
   </div>
 
-  <!-- BIG MODALS (kept if other scripts still use them) -->
-  <div class="modal hidden" id="giftShopModal"><div class="bigCard" id="giftShopCard"></div></div>
-  <div class="modal hidden" id="collectionModal"><div class="bigCard" id="collectionCard"></div></div>
+  <!-- SLOTS MODAL -->
   <div class="modal hidden" id="slotsModal"><div class="bigCard" id="slotsCard"></div></div>
 
 
