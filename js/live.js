@@ -14,10 +14,20 @@ import {
 
 const SEASON_ID = "season1";
 const SCHEDULE_PATH = "data/schedule.json";
+const STANDINGS_PATH = "data/standings.json";
 
 const el = (id) => document.getElementById(id);
-const STANDINGS_PATH = "data/standings.json";
+
 let TEAM_LOGO_MAP = null;
+
+// =========================
+//  JSON HELPERS
+// =========================
+async function loadJSON(path) {
+  const res = await fetch(path, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load ${path}`);
+  return res.json();
+}
 
 async function getTeamLogoMap() {
   if (TEAM_LOGO_MAP) return TEAM_LOGO_MAP;
@@ -39,13 +49,9 @@ function confClass(conf) {
   return "ooc";
 }
 
-async function loadJSON(path) {
-  const res = await fetch(path, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Failed to load ${path}`);
-  return res.json();
-}
-
-// ---------- TIME HELPERS (locks on game date at 12:00am ET) ----------
+// =========================
+//  TIME HELPERS (ET)
+// =========================
 function nowET() {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/New_York",
@@ -63,10 +69,12 @@ function nowET() {
 function isLocked(dateKey) {
   // Lock as soon as the date begins in America/New_York
   const todayET = nowET();
-  return dateKey <= todayET; // locked on game date and after
+  return dateKey <= todayET;
 }
 
-// ---------- SCHEDULE HELPERS ----------
+// =========================
+//  SCHEDULE HELPERS
+// =========================
 function groupByDate(games) {
   const map = new Map();
   for (const g of games) {
@@ -84,10 +92,7 @@ function isGameDayComplete(list5) {
 function findNextGameDay(schedule) {
   const games = schedule.games || [];
   const byDate = groupByDate(games);
-
-  // sorted dates
   const dates = Array.from(byDate.keys()).sort();
-
   const today = nowET();
 
   for (const date of dates) {
@@ -102,11 +107,12 @@ function findNextGameDay(schedule) {
 
     return { date, games5 };
   }
-
   return null;
 }
 
-// ---------- UI HELPERS ----------
+// =========================
+//  UI HELPERS
+// =========================
 function escapeHtml(s) {
   return String(s)
     .replaceAll("&", "&amp;")
@@ -114,6 +120,34 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+// ✅ CHANGE: store votes under /users/{uid}/votes/{season_date}
+// This matches your Firestore rules and stops permission-denied.
+function voteDocRef(uid, date) {
+  return doc(db, "users", uid, "votes", `${SEASON_ID}_${date}`);
+}
+
+// ✅ read picks from radio buttons
+function getPicksFromUI() {
+  const picks = {};
+  for (let i = 1; i <= 5; i++) {
+    const chosen = document.querySelector(`input[name="g${i}"]:checked`);
+    if (chosen) picks[`g${i}`] = chosen.value; // RAW team name
+  }
+  return picks;
+}
+
+function countChosen(picks) {
+  return Object.keys(picks || {}).length;
+}
+
+function samePicks(a = {}, b = {}) {
+  const ak = Object.keys(a);
+  const bk = Object.keys(b);
+  if (ak.length !== bk.length) return false;
+  for (const k of ak) if (a[k] !== b[k]) return false;
+  return true;
 }
 
 // ✅ IMPORTANT: value attributes must be the RAW team string
@@ -134,7 +168,6 @@ function renderVotingUI({ date, games5 }, savedPicks = {}) {
       : `Voting closes when ${date} begins (ET).`;
   }
 
-  // We fill votingList ONLY. We do NOT create extra submit buttons.
   votingList.innerHTML = `
     <div class="votingWrap">
       <div class="votingGames">
@@ -154,7 +187,6 @@ function renderVotingUI({ date, games5 }, savedPicks = {}) {
           const conf = escapeHtml(g.conference || "OOC");
           const klass = confClass(g.conference);
 
-          // We’ll fill logos async in initVoting (after we have logoMap)
           return `
             <div class="voteGameCard ${klass}">
               <div class="voteGameTop">
@@ -190,37 +222,9 @@ function renderVotingUI({ date, games5 }, savedPicks = {}) {
   }
 }
 
-function voteDocRef(uid, date) {
-  return doc(db, "seasons", SEASON_ID, "gameDays", date, "votes", uid);
-}
-
-// ✅ read picks from radio buttons
-function getPicksFromUI() {
-  const picks = {};
-  for (let i = 1; i <= 5; i++) {
-    const chosen = document.querySelector(`input[name="g${i}"]:checked`);
-    if (chosen) picks[`g${i}`] = chosen.value; // RAW team name
-  }
-  return picks;
-}
-
-function countChosen(picks) {
-  return Object.keys(picks || {}).length;
-}
-
-function samePicks(a = {}, b = {}) {
-  const ak = Object.keys(a);
-  const bk = Object.keys(b);
-  if (ak.length !== bk.length) return false;
-  for (const k of ak) {
-    if (a[k] !== b[k]) return false;
-  }
-  return true;
-}
-
-// =====================================================
+// =========================
 //  VOTING INIT
-// =====================================================
+// =========================
 export function initVoting() {
   const submitBtn = el("submitVotesBtn");
   const votingMeta = el("votingMeta");
@@ -229,8 +233,8 @@ export function initVoting() {
 
   if (!votingList) return;
 
-  let currentGameDay = null;     // { date, games5 }
-  let savedPicks = {};           // saved from Firestore for the current day
+  let currentGameDay = null; // { date, games5 }
+  let savedPicks = {};       // saved from Firestore for the current day
 
   function updateSubmitButtonState() {
     if (!submitBtn || !currentGameDay) return;
@@ -252,14 +256,12 @@ export function initVoting() {
       return;
     }
 
-    // if nothing saved yet
     if (!savedPicks || Object.keys(savedPicks).length === 0) {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Votes";
       return;
     }
 
-    // saved exists: compare
     if (samePicks(savedPicks, picksNow)) {
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitted ✅";
@@ -273,12 +275,10 @@ export function initVoting() {
     try {
       const logoMap = await getTeamLogoMap();
       const fallback = "assets/logos/league/usa-logo.png";
+
       document.querySelectorAll(".voteTeamLogo[data-team]").forEach(img => {
-        const team = img.getAttribute("data-team"); // escaped
-        // find original key by comparing escaped—safe fallback:
-        // easiest: just use alt text (already escaped) for display; logo map uses raw names
-        // We'll search by raw keys:
-        const raw = Object.keys(logoMap).find(k => escapeHtml(k) === team);
+        const teamEscaped = img.getAttribute("data-team"); // escaped
+        const raw = Object.keys(logoMap).find(k => escapeHtml(k) === teamEscaped);
         img.src = raw ? (logoMap[raw] || fallback) : fallback;
       });
     } catch (e) {
@@ -307,6 +307,7 @@ export function initVoting() {
         if (votingMeta) votingMeta.textContent = `Next game day: ${next.date} (login to vote)`;
         renderVotingUI(next, {});
         await applyTeamLogos();
+
         if (submitBtn) {
           submitBtn.disabled = true;
           submitBtn.textContent = "Login required";
@@ -317,7 +318,7 @@ export function initVoting() {
 
       const uid = window.__USA_UID__;
 
-      // Load saved picks (if any)
+      // Load saved picks (if any) from /users/{uid}/votes/{season_date}
       const ref = voteDocRef(uid, next.date);
       const snap = await getDoc(ref);
       savedPicks = snap.exists() ? (snap.data().picks || {}) : {};
@@ -325,7 +326,7 @@ export function initVoting() {
       renderVotingUI(next, savedPicks);
       await applyTeamLogos();
 
-      // watch for changes to enable resubmit
+      // enable resubmit text / button state
       document.querySelectorAll(`#votingList input[type="radio"]`).forEach(r => {
         r.addEventListener("change", updateSubmitButtonState);
       });
@@ -365,12 +366,12 @@ export function initVoting() {
         const ref = voteDocRef(uid, date);
         await setDoc(ref, {
           uid,
+          seasonId: SEASON_ID,
           date,
           picks: picksNow,
           submittedAt: serverTimestamp(),
         }, { merge: true });
 
-        // update saved state so "Submitted ✅" / "Resubmit" works immediately
         savedPicks = { ...picksNow };
         updateSubmitButtonState();
 
@@ -382,45 +383,35 @@ export function initVoting() {
     });
   }
 
-  // If user logs in/out later, reload voting
-  let lastUid = window.__USA_UID__ || null;
-  setInterval(() => {
-    const uid = window.__USA_UID__ || null;
-    if (uid !== lastUid) {
-      lastUid = uid;
-      refreshVoting();
-    }
-  }, 500);
+  // ✅ CHANGE: stop polling, listen for auth event instead
+  window.addEventListener("usa-auth-changed", refreshVoting);
 
+  // initial load
   refreshVoting();
 }
 
-// =====================================================
+// =========================
 //  PREDICTION LEADERS INIT
-//  (username only, sorts by vote % desc)
-// =====================================================
+//  ✅ CHANGE: DO NOT read /users (your rules deny it)
+//  Read /predictionLeaders instead (your rules allow public read)
+// =========================
 export function initPredictionLeaders() {
   const root = el("predictionLeaders");
   if (!root) return;
 
-  const usersQ = query(collection(db, "users"), orderBy("correctPicks", "desc"));
+  const leadersQ = query(collection(db, "predictionLeaders"), orderBy("votePct", "desc"));
 
-  onSnapshot(usersQ, (snap) => {
+  onSnapshot(leadersQ, (snap) => {
     const rows = [];
 
     snap.forEach((d) => {
       const u = d.data() || {};
-      const username = u.username || "Unknown";
-      const correct = u.correctPicks || 0;
-      const total = u.totalPicks || 0;
-      const pct = total > 0 ? (correct / total) * 100 : 0;
-
-      rows.push({ username, correct, total, pct });
-    });
-
-    rows.sort((a, b) => {
-      if (b.pct !== a.pct) return b.pct - a.pct;
-      return b.total - a.total;
+      rows.push({
+        username: u.username || "Unknown",
+        correct: Number(u.correct || 0),
+        total: Number(u.total || 0),
+        pct: Number(u.votePct || 0),
+      });
     });
 
     root.innerHTML = `

@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Underdog Slugging Association</title>
-
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -26,8 +25,8 @@
     </div>
 
     <div class="loginActions">
-      <button class="primaryBtn" id="signupBtn">Create Account</button>
-      <button class="ghostBtn" id="loginBtn">Login</button>
+      <button class="primaryBtn" id="signupBtn" type="button">Create Account</button>
+      <button class="ghostBtn" id="loginBtn" type="button">Login</button>
     </div>
 
     <div class="smallNote" id="authError"></div>
@@ -43,9 +42,7 @@
       <!-- HUD -->
       <header class="hud">
         <div class="hudLeft">
-          <!-- NOTE: Make this extension match GitHub EXACTLY (.png vs .PNG) -->
           <img class="hudLogo" src="./assets/logos/league/usa-logo.PNG" alt="League Logo" />
-
           <div class="hudTitleBlock">
             <div class="hudTitle">Underdog Slugging Association</div>
             <div class="hudSub">Season: <span id="hudSeason">Season 1</span></div>
@@ -59,7 +56,6 @@
           </div>
 
           <div class="hudStat hudCoins">
-            <!-- NOTE: Make this extension match GitHub EXACTLY (.png vs .PNG) -->
             <img class="coinIcon" src="./assets/icons/waffle-coin.PNG" alt="Waffle Coin" />
             <div>
               <div class="hudLabel">Waffle Coins</div>
@@ -81,6 +77,7 @@
         </div>
       </header>
 
+
       <!-- MAIN GRID -->
       <main class="grid">
 
@@ -89,9 +86,9 @@
           <div class="panelHeader">
             <h2>Standings</h2>
             <div class="tabs">
-              <button class="tabBtn active" data-tabgroup="standings" data-tab="league">League</button>
-              <button class="tabBtn" data-tabgroup="standings" data-tab="solar">Solar</button>
-              <button class="tabBtn" data-tabgroup="standings" data-tab="lunar">Lunar</button>
+              <button class="tabBtn active" data-tabgroup="standings" data-tab="league" type="button">League</button>
+              <button class="tabBtn" data-tabgroup="standings" data-tab="solar" type="button">Solar</button>
+              <button class="tabBtn" data-tabgroup="standings" data-tab="lunar" type="button">Lunar</button>
             </div>
           </div>
 
@@ -116,58 +113,59 @@
           </div>
         </section>
 
+
         <!-- VOTING + SHOP + COLLECTION -->
         <section class="panel">
           <div class="panelHeader">
             <h2>Voting & Shops</h2>
             <div class="tabs">
-              <button class="tabBtn active" data-tabgroup="right" data-tab="voting">Voting</button>
-              <button class="tabBtn" data-tabgroup="right" data-tab="giftshop">Mask’s Gift Shop</button>
-              <button class="tabBtn" data-tabgroup="right" data-tab="collection">Collection</button>
+              <button class="tabBtn active" data-tabgroup="right" data-tab="voting" type="button">Voting</button>
+              <button class="tabBtn" data-tabgroup="right" data-tab="giftshop" type="button">Mask’s Gift Shop</button>
+              <button class="tabBtn" data-tabgroup="right" data-tab="collection" type="button">Collection</button>
             </div>
           </div>
 
           <div class="tabContent active" data-tabgroup="right" data-tab="voting">
             <div class="panelNote" id="votingMeta">Next game day: loading...</div>
             <div id="votingList"></div>
-            <button class="primaryBtn" id="submitVotesBtn">Submit Votes</button>
+            <button class="primaryBtn" id="submitVotesBtn" type="button">Submit Votes</button>
             <div class="smallNote" id="voteLockNote"></div>
           </div>
 
-          <!-- ✅ Shop renders inline now -->
           <div class="tabContent" data-tabgroup="right" data-tab="giftshop">
             <div class="smallNote">Click an item to view it bigger and buy it.</div>
             <div id="giftShopInline"></div>
           </div>
 
-          <!-- ✅ Collection renders inline now -->
           <div class="tabContent" data-tabgroup="right" data-tab="collection">
             <div class="smallNote">Click an item to view it bigger.</div>
             <div id="collectionInline"></div>
           </div>
         </section>
 
+
         <!-- LEAGUE LEADERS -->
         <section class="panel">
           <div class="panelHeader">
             <h2>League Leaders</h2>
             <div class="tabs">
-              <button class="tabBtn active" data-tabgroup="leaders" data-tab="hr">HR</button>
-              <button class="tabBtn" data-tabgroup="leaders" data-tab="runs">Runs</button>
-              <button class="tabBtn" data-tabgroup="leaders" data-tab="rbi">RBI</button>
-              <button class="tabBtn" data-tabgroup="leaders" data-tab="so">SO</button>
+              <button class="tabBtn active" data-tabgroup="leaders" data-tab="hr" type="button">HR</button>
+              <button class="tabBtn" data-tabgroup="leaders" data-tab="runs" type="button">Runs</button>
+              <button class="tabBtn" data-tabgroup="leaders" data-tab="rbi" type="button">RBI</button>
+              <button class="tabBtn" data-tabgroup="leaders" data-tab="so" type="button">SO</button>
             </div>
           </div>
           <div id="leadersContent"></div>
         </section>
+
 
         <!-- PREDICTIONS + SLOTS -->
         <section class="panel">
           <div class="panelHeader">
             <h2>Predictions & Slots</h2>
             <div class="tabs">
-              <button class="tabBtn active" data-tabgroup="fun" data-tab="pred">Prediction Leaders</button>
-              <button class="tabBtn" data-tabgroup="fun" data-tab="slots">Ploopy’s Slick Slots</button>
+              <button class="tabBtn active" data-tabgroup="fun" data-tab="pred" type="button">Prediction Leaders</button>
+              <button class="tabBtn" data-tabgroup="fun" data-tab="slots" type="button">Ploopy’s Slick Slots</button>
             </div>
           </div>
 
@@ -175,19 +173,20 @@
             <div id="predictionLeaders"></div>
           </div>
 
-         <div class="tabContent" data-tabgroup="fun" data-tab="slots">
-  <div id="slotsInline"></div>
-</div>
-
+          <!-- ✅ Slots now render right here (no popup, no play button) -->
+          <div class="tabContent" data-tabgroup="fun" data-tab="slots">
+            <div id="slotsInline"></div>
+          </div>
         </section>
+
 
         <!-- GAME LOGS + SUGGESTIONS -->
         <section class="panel">
           <div class="panelHeader">
             <h2>Season & Suggestions</h2>
             <div class="tabs">
-              <button class="tabBtn active" data-tabgroup="season" data-tab="logs">Season 1 Game Logs</button>
-              <button class="tabBtn" data-tabgroup="season" data-tab="suggest">Future Season Suggestions</button>
+              <button class="tabBtn active" data-tabgroup="season" data-tab="logs" type="button">Season 1 Game Logs</button>
+              <button class="tabBtn" data-tabgroup="season" data-tab="suggest" type="button">Future Season Suggestions</button>
             </div>
           </div>
 
@@ -197,12 +196,13 @@
 
           <div class="tabContent" data-tabgroup="season" data-tab="suggest">
             <textarea id="suggestionText" class="textArea" placeholder="Buff/Nerf suggestions... (1 per day)"></textarea>
-            <button class="primaryBtn" id="submitSuggestionBtn">Submit Suggestion</button>
+            <button class="primaryBtn" id="submitSuggestionBtn" type="button">Submit Suggestion</button>
             <div class="smallNote" id="suggestionNote"></div>
           </div>
         </section>
 
       </main>
+
 
       <!-- ESPN style ticker -->
       <div class="ticker" id="ticker">
@@ -213,7 +213,7 @@
       <div class="tickerDrawer hidden" id="tickerDrawer">
         <div class="drawerHeader">
           <div class="drawerTitle">Headlines</div>
-          <button class="ghostBtn" id="closeDrawerBtn">Close</button>
+          <button class="ghostBtn" id="closeDrawerBtn" type="button">Close</button>
         </div>
         <div id="headlineList"></div>
       </div>
@@ -227,7 +227,7 @@
     <div class="modalCard">
       <h3>Game Day Results</h3>
       <div id="rewardText"></div>
-      <button class="primaryBtn" id="rewardCloseBtn">Nice!</button>
+      <button class="primaryBtn" id="rewardCloseBtn" type="button">Nice!</button>
     </div>
   </div>
 
@@ -235,9 +235,6 @@
   <div class="modal hidden" id="itemDetailModal">
     <div class="modalCard" id="itemDetailCard"></div>
   </div>
-
-  <!-- SLOTS MODAL -->
-  <div class="modal hidden" id="slotsModal"><div class="bigCard" id="slotsCard"></div></div>
 
 
   <!-- Firebase boot + Auth wiring -->
@@ -256,11 +253,18 @@
     const passEl  = document.getElementById("password");
     const userEl  = document.getElementById("username");
 
+    // helper so NOTHING fails silently
+    function fireAuthChanged() {
+      window.dispatchEvent(new Event("usa-auth-changed"));
+      console.log("🔔 usa-auth-changed fired. uid=", window.__USA_UID__);
+    }
+
     document.getElementById("signupBtn").onclick = async () => {
       err.textContent = "";
       try {
         await signup(emailEl.value.trim(), passEl.value.trim(), userEl.value.trim());
       } catch (e) {
+        console.error(e);
         err.textContent = e?.message || String(e);
       }
     };
@@ -270,6 +274,7 @@
       try {
         await login(emailEl.value.trim(), passEl.value.trim());
       } catch (e) {
+        console.error(e);
         err.textContent = e?.message || String(e);
       }
     };
@@ -277,6 +282,7 @@
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) logoutBtn.onclick = async () => {
       window.__USA_UID__ = null;
+      fireAuthChanged();
       await logout();
     };
 
@@ -285,18 +291,24 @@
     watchAuth(async (user) => {
       if (!user) {
         window.__USA_UID__ = null;
+        fireAuthChanged();
+
         loginPanel.classList.remove("hidden");
         appRoot.classList.add("hidden");
         return;
       }
 
       window.__USA_UID__ = user.uid;
+      fireAuthChanged();
 
       loginPanel.classList.add("hidden");
       appRoot.classList.remove("hidden");
 
-      try { await ensureDailyBonus(user.uid); } catch {}
-      try { await callFn("syncMyResults")({}); } catch {}
+      try { await ensureDailyBonus(user.uid); }
+      catch (e) { console.warn("❌ ensureDailyBonus failed:", e); }
+
+      try { await callFn("syncMyResults")({}); }
+      catch (e) { console.warn("❌ syncMyResults failed:", e); }
     });
   </script>
 
