@@ -173,7 +173,6 @@
             <div id="predictionLeaders"></div>
           </div>
 
-          <!-- ✅ Slots now render right here (no popup, no play button) -->
           <div class="tabContent" data-tabgroup="fun" data-tab="slots">
             <div id="slotsInline"></div>
           </div>
@@ -231,7 +230,7 @@
     </div>
   </div>
 
-  <!-- ✅ Shared Item Details Modal (shop + collection) -->
+  <!-- Shared Item Details Modal (shop + collection) -->
   <div class="modal hidden" id="itemDetailModal">
     <div class="modalCard" id="itemDetailCard"></div>
   </div>
@@ -242,7 +241,7 @@
     console.log("✅ auth module loaded");
 
     import { callFn } from "./js/firebase.js";
-    import { signup, login, logout, watchAuth, ensureDailyBonus } from "./js/auth.js";
+    import { signup, login, logout, watchAuth } from "./js/auth.js";
     import { initRewardPopup } from "./js/rewards.js";
 
     const loginPanel = document.getElementById("loginPanel");
@@ -253,7 +252,6 @@
     const passEl  = document.getElementById("password");
     const userEl  = document.getElementById("username");
 
-    // helper so NOTHING fails silently
     function fireAuthChanged() {
       window.dispatchEvent(new Event("usa-auth-changed"));
       console.log("🔔 usa-auth-changed fired. uid=", window.__USA_UID__);
@@ -304,11 +302,20 @@
       loginPanel.classList.add("hidden");
       appRoot.classList.remove("hidden");
 
-      try { await ensureDailyBonus(user.uid); }
-      catch (e) { console.warn("❌ ensureDailyBonus failed:", e); }
+      // ✅ Server-side daily bonus (callable)
+      try {
+        const res = await callFn("ensureDailyBonus")({});
+        console.log("🎁 ensureDailyBonus:", res?.data || res);
+      } catch (e) {
+        console.warn("❌ ensureDailyBonus callable failed:", e);
+      }
 
-      try { await callFn("syncMyResults")({}); }
-      catch (e) { console.warn("❌ syncMyResults failed:", e); }
+      // keep your existing sync call
+      try {
+        await callFn("syncMyResults")({});
+      } catch (e) {
+        console.warn("❌ syncMyResults failed:", e);
+      }
     });
   </script>
 
