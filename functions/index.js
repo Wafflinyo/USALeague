@@ -1,5 +1,5 @@
 /**
- * functions/index.js  (GEN 2 / v2)
+ * functions/index.js (GEN 2 / v2)
  * Deploy: firebase deploy --only functions
  */
 
@@ -10,7 +10,6 @@ const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onUserCreated } = require("firebase-functions/v2/identity");
 
 // -----------------------------
 // Config
@@ -77,33 +76,6 @@ function safeSymbol(sym) {
 }
 
 // -----------------------------
-// ✅ Auto-create user doc (Auth trigger) - GEN 2
-// -----------------------------
-exports.onAuthUserCreated = onUserCreated({ region: REGION }, async (event) => {
-  const user = event.data;
-  const uid = user.uid;
-
-  const userRef = db.collection("users").doc(uid);
-  const snap = await userRef.get();
-  if (snap.exists) return;
-
-  const email = user.email || "";
-  const fallbackUsername = email
-    ? email.split("@")[0].slice(0, 18)
-    : `user_${uid.slice(0, 6)}`;
-
-  await userRef.set({
-    username: fallbackUsername,
-    coins: NEW_USER_BONUS,
-    correctPicks: 0,
-    totalPicks: 0,
-    slotsStreak: 0,
-    lastDailyBonus: null,
-    createdAt: FieldValue.serverTimestamp(),
-  });
-});
-
-// -----------------------------
 // ✅ Daily bonus (callable) - GEN 2
 // -----------------------------
 exports.ensureDailyBonus = onCall({ region: REGION }, async (req) => {
@@ -114,7 +86,7 @@ exports.ensureDailyBonus = onCall({ region: REGION }, async (req) => {
   return await db.runTransaction(async (tx) => {
     const snap = await tx.get(userRef);
 
-    // Create a profile if missing (so nobody gets stuck)
+    // If profile missing, create it safely then apply daily bonus
     if (!snap.exists) {
       const profile = {
         username: `user_${uid.slice(0, 6)}`,
@@ -126,13 +98,7 @@ exports.ensureDailyBonus = onCall({ region: REGION }, async (req) => {
         createdAt: FieldValue.serverTimestamp(),
       };
       tx.set(userRef, profile, { merge: true });
-      return {
-        applied: true,
-        today,
-        coins: profile.coins,
-        bonus: DAILY_BONUS,
-        createdProfile: true,
-      };
+      return { applied: true, today, coins: profile.coins, bonus: DAILY_BONUS, createdProfile: true };
     }
 
     const u = snap.data() || {};
@@ -145,13 +111,7 @@ exports.ensureDailyBonus = onCall({ region: REGION }, async (req) => {
     const newCoins = Number(u.coins || 0) + DAILY_BONUS;
     tx.update(userRef, { coins: newCoins, lastDailyBonus: today });
 
-    return {
-      applied: true,
-      today,
-      coins: newCoins,
-      bonus: DAILY_BONUS,
-      createdProfile: false,
-    };
+    return { applied: true, today, coins: newCoins, bonus: DAILY_BONUS, createdProfile: false };
   });
 });
 
@@ -175,17 +135,13 @@ exports.playSlots = onCall({ region: REGION }, async (req) => {
 
   return await db.runTransaction(async (tx) => {
     const snap = await tx.get(userRef);
-    if (!snap.exists) {
-      throw new HttpsError("failed-precondition", "User profile missing.");
-    }
+    if (!snap.exists) throw new HttpsError("failed-precondition", "User profile missing.");
 
     const u = snap.data() || {};
     const coins = Number(u.coins || 0);
     let streak = Number(u.slotsStreak || 0);
 
-    if (coins < 1) {
-      throw new HttpsError("failed-precondition", "Not enough coins.");
-    }
+    if (coins < 1) throw new HttpsError("failed-precondition", "Not enough coins.");
 
     let newCoins = coins - 1;
 
@@ -218,15 +174,7 @@ exports.playSlots = onCall({ region: REGION }, async (req) => {
       lastSlotAt: FieldValue.serverTimestamp(),
     });
 
-    return {
-      symbols: [s1, s2, s3],
-      isWin,
-      payout,
-      streak,
-      coins: newCoins,
-      cost: 1,
-      tripleHopeDogo,
-    };
+    return { symbols: [s1, s2, s3], isWin, payout, streak, coins: newCoins, cost: 1, tripleHopeDogo };
   });
 });
 
@@ -272,9 +220,7 @@ exports.buyShopItem = onCall({ region: REGION }, async (req) => {
 
     let newQty = 1;
     if (stackable) {
-      if (prevQty >= maxStack) {
-        throw new HttpsError("failed-precondition", `Max stack reached (${maxStack}).`);
-      }
+      if (prevQty >= maxStack) throw new HttpsError("failed-precondition", `Max stack reached (${maxStack}).`);
       newQty = prevQty + 1;
     } else {
       if (invSnap.exists) throw new HttpsError("failed-precondition", "You already own this item.");
@@ -307,7 +253,6 @@ exports.buyShopItem = onCall({ region: REGION }, async (req) => {
 // -----------------------------
 exports.syncMyResults = onCall({ region: REGION }, async (req) => {
   const uid = requireAuth(req);
-  // v2 logger is also available, but console.log is fine
   console.log("syncMyResults called by", uid);
   return { ok: true };
 });
