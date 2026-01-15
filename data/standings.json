@@ -35,7 +35,7 @@
     { "name": "Narf Bullets", "conference": "Solar", "logo": "assets/logos/teams/narf-bullets.PNG", "wins": 1, "losses": 2, "runsFor": 10, "runsAgainst": 8 },
     { "name": "Nashville Knights", "conference": "Solar", "logo": "assets/logos/teams/nashville-knights.PNG", "wins": 2, "losses": 1, "runsFor": 14, "runsAgainst": 12 },
     { "name": "Comet Eons", "conference": "Solar", "logo": "assets/logos/teams/comet-eons.PNG", "wins": 3, "losses": 0, "runsFor": 26, "runsAgainst": 13 },
-    { "name": "MK Monarchs", "conference": "Solar", "logo": "assets/logos/teams/mk-monarchs.PNG", "wins": 1, "losses": 2, "runsFor": 11, "runsAgainst": 13 },
+    { "name": "MK Monarchs", "conference": "Solar", "logo": "assets/logos/teams/mk-monarchs.PNG", "wins": 1, "losses": 2, "runsFor": 11, "runsAgainst": 15 },
     { "name": "Hopedogo Retrievers", "conference": "Solar", "logo": "assets/logos/teams/hopedogo-retrievers.PNG", "wins": 1, "losses": 2, "runsFor": 8, "runsAgainst": 11 }
   ]
 }
