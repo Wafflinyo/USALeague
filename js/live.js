@@ -1,14 +1,12 @@
 // js/live.js (REWRITE - event driven, no polling)
+// ✅ Voting only (Prediction Leaders removed)
+
 import { db } from "./firebase.js";
 import {
-  collection,
   doc,
   getDoc,
   setDoc,
   serverTimestamp,
-  onSnapshot,
-  query,
-  orderBy,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const SEASON_ID = "season1";
@@ -128,7 +126,7 @@ function findNextGameDay(schedule) {
 // UI HELPERS
 // =========================
 function escapeHtml(s) {
-  return String(s)
+  return String(s ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -411,65 +409,4 @@ export function initVoting() {
 
   // Initial load
   refreshVoting();
-}
-
-// =========================
-// PREDICTION LEADERS INIT
-// Reads /predictionLeaders (public read allowed by your rules)
-// =========================
-export function initPredictionLeaders() {
-  const root = el("predictionLeaders");
-  if (!root) return;
-
-  const leadersQ = query(collection(db, "predictionLeaders"), orderBy("votePct", "desc"));
-
-  onSnapshot(
-    leadersQ,
-    (snap) => {
-      const rows = [];
-
-      snap.forEach((d) => {
-        const u = d.data() || {};
-        rows.push({
-          username: u.username || "Unknown",
-          correct: Number(u.correct || 0),
-          total: Number(u.total || 0),
-          pct: Number(u.votePct || 0),
-        });
-      });
-
-      root.innerHTML = `
-        <table class="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>User</th>
-              <th>Correct</th>
-              <th>Total</th>
-              <th>Vote %</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows
-              .map(
-                (r, i) => `
-              <tr>
-                <td>${i + 1}</td>
-                <td><b>${escapeHtml(r.username)}</b></td>
-                <td>${r.correct}</td>
-                <td>${r.total}</td>
-                <td><b>${r.pct.toFixed(1)}%</b></td>
-              </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
-      `;
-    },
-    (err) => {
-      console.error("Prediction leaders snapshot error:", err);
-      root.innerHTML = `<div class="panelNote">Could not load prediction leaders.</div>`;
-    }
-  );
 }

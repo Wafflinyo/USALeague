@@ -68,11 +68,6 @@ export async function signup(email, password, username) {
 
   // Optional: Immediately apply server-side daily bonus on first signup/login.
   // If you already call ensureDailyBonus() from your HTML watchAuth, you can remove this.
-  try {
-    await ensureDailyBonus();
-  } catch (e) {
-    console.warn("⚠️ ensureDailyBonus after signup failed:", e);
-  }
 
   return uid;
 }

@@ -10,7 +10,7 @@ import {
   initTicker,
 } from "./render.js";
 
-import { initVoting, initPredictionLeaders } from "./live.js";
+import { initVoting } from "./live.js";
 import { initShopUI } from "./shop.js";
 import { initSlotsUI } from "./slots.js";
 import { initSuggestions } from "./suggestions.js";
@@ -64,6 +64,7 @@ function applyHudFromUserDoc(u = {}) {
   if (el("hudUsername")) el("hudUsername").textContent = username;
   if (el("hudCoins")) el("hudCoins").textContent = String(coins);
   if (el("hudVoteCount")) el("hudVoteCount").textContent = String(total);
+
   if (el("hudVotePct")) {
     el("hudVotePct").textContent =
       total > 0 ? `${Math.round((correct / total) * 100)}%` : "0%";
@@ -90,7 +91,6 @@ function attachUserListener(uid) {
     userRef,
     (snap) => {
       if (!snap.exists()) {
-        // user doc missing (can happen if signup doc didn't write / trigger failed)
         console.warn("User doc missing for uid:", uid);
         clearHud();
         return;
@@ -127,9 +127,8 @@ initStaticPanels();
 
 // init modules once
 initVoting();
-initPredictionLeaders();
 initShopUI();
-initSlotsUI();       // IMPORTANT: this should be the INLINE slots version now
+initSlotsUI(); // INLINE slots version
 initSuggestions();
 
 // listen for auth changes from index.html

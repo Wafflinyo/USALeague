@@ -159,21 +159,16 @@
         </section>
 
 
-        <!-- PREDICTIONS + SLOTS -->
+        <!-- SLOTS ONLY (Prediction Leaders removed) -->
         <section class="panel">
           <div class="panelHeader">
-            <h2>Predictions & Slots</h2>
+            <h2>Ploopy’s Slick Slots</h2>
             <div class="tabs">
-              <button class="tabBtn active" data-tabgroup="fun" data-tab="pred" type="button">Prediction Leaders</button>
-              <button class="tabBtn" data-tabgroup="fun" data-tab="slots" type="button">Ploopy’s Slick Slots</button>
+              <button class="tabBtn active" data-tabgroup="fun" data-tab="slots" type="button">Play</button>
             </div>
           </div>
 
-          <div class="tabContent active" data-tabgroup="fun" data-tab="pred">
-            <div id="predictionLeaders"></div>
-          </div>
-
-          <div class="tabContent" data-tabgroup="fun" data-tab="slots">
+          <div class="tabContent active" data-tabgroup="fun" data-tab="slots">
             <div id="slotsInline"></div>
           </div>
         </section>
@@ -221,10 +216,10 @@
   </div>
 
 
-  <!-- REWARD POPUP -->
+  <!-- REWARD POPUP (reused for daily bonus + results) -->
   <div class="modal hidden" id="rewardModal">
     <div class="modalCard">
-      <h3>Game Day Results</h3>
+      <h3 id="rewardTitle">Rewards</h3>
       <div id="rewardText"></div>
       <button class="primaryBtn" id="rewardCloseBtn" type="button">Nice!</button>
     </div>
@@ -252,9 +247,31 @@
     const passEl  = document.getElementById("password");
     const userEl  = document.getElementById("username");
 
+    const rewardModal = document.getElementById("rewardModal");
+    const rewardTitle = document.getElementById("rewardTitle");
+    const rewardText  = document.getElementById("rewardText");
+    const rewardClose = document.getElementById("rewardCloseBtn");
+
     function fireAuthChanged() {
       window.dispatchEvent(new Event("usa-auth-changed"));
       console.log("🔔 usa-auth-changed fired. uid=", window.__USA_UID__);
+    }
+
+    // Simple "show modal once" protection (per page-load)
+    let showingReward = false;
+
+    function showRewardModal(title, html) {
+      if (showingReward) return; // prevents double popup
+      showingReward = true;
+
+      if (rewardTitle) rewardTitle.textContent = title || "Rewards";
+      rewardText.innerHTML = html || "";
+      rewardModal.classList.remove("hidden");
+
+      rewardClose.onclick = () => {
+        rewardModal.classList.add("hidden");
+        showingReward = false;
+      };
     }
 
     document.getElementById("signupBtn").onclick = async () => {
@@ -284,7 +301,24 @@
       await logout();
     };
 
+    // Results popup system (handled in rewards.js)
     initRewardPopup();
+
+    // LocalStorage guard so daily bonus popup doesn't show twice in a day on refresh
+    function nyDateKeyClient() {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/New_York",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).formatToParts(new Date());
+      const y = parts.find(p => p.type === "year")?.value;
+      const m = parts.find(p => p.type === "month")?.value;
+      const d = parts.find(p => p.type === "day")?.value;
+      return `${y}-${m}-${d}`;
+    }
+
+    const DAILY_POP_KEY = "usa_daily_bonus_popup_shown_";
 
     watchAuth(async (user) => {
       if (!user) {
@@ -302,19 +336,32 @@
       loginPanel.classList.add("hidden");
       appRoot.classList.remove("hidden");
 
-      // ✅ Server-side daily bonus (callable)
+      // ✅ Server-side daily bonus
       try {
         const res = await callFn("ensureDailyBonus")({});
-        console.log("🎁 ensureDailyBonus:", res?.data || res);
+        const data = res?.data || res;
+
+        console.log("🎁 ensureDailyBonus:", data);
+
+        const todayNY = data?.today || nyDateKeyClient();
+        const key = DAILY_POP_KEY + todayNY;
+        const alreadyShown = localStorage.getItem(key) === "1";
+
+        if (data?.applied && !alreadyShown) {
+          localStorage.setItem(key, "1");
+
+          showRewardModal(
+            "Daily Login Bonus!",
+            `
+              <div style="font-weight:900;">🎁 Daily Bonus Claimed</div>
+              <div style="margin-top:6px;">+<b>${data.bonus ?? 50}</b> Waffle Coins</div>
+              <div style="margin-top:6px;">New Balance: <b>${data.coins ?? "?"}</b></div>
+              <div style="opacity:.75;margin-top:8px;font-size:.9em;">(NY Date: ${todayNY})</div>
+            `
+          );
+        }
       } catch (e) {
         console.warn("❌ ensureDailyBonus callable failed:", e);
-      }
-
-      // keep your existing sync call
-      try {
-        await callFn("syncMyResults")({});
-      } catch (e) {
-        console.warn("❌ syncMyResults failed:", e);
       }
     });
   </script>

@@ -235,10 +235,19 @@ h2{
   background: var(--btn);
   color: var(--btnText);
   box-shadow: 0 6px 16px rgba(0,0,0,0.20);
-}
 
+  /* ✅ small press feedback */
+  transition: transform 120ms ease, filter 120ms ease;
+}
 .primaryBtn:hover{ filter: brightness(1.06); }
-.primaryBtn:active{ filter: brightness(0.98); }
+.primaryBtn:active{
+  filter: brightness(0.98);
+  transform: translateY(1px);
+}
+.primaryBtn:disabled{
+  opacity: .65;
+  cursor: not-allowed;
+}
 
 .ghostBtn{
   border: 2px solid rgba(255,214,102,0.42);
@@ -248,10 +257,14 @@ h2{
   padding:10px 12px;
   font-weight:950;
   cursor:pointer;
-}
 
+  transition: transform 120ms ease, filter 120ms ease, background 120ms ease, border-color 120ms ease;
+}
 .ghostBtn:hover{ background: rgba(0,0,0,0.28); }
-.ghostBtn:active{ filter: brightness(0.98); }
+.ghostBtn:active{
+  filter: brightness(0.98);
+  transform: translateY(1px);
+}
 
 .input, .textArea{
   width:100%;
@@ -424,7 +437,7 @@ h2{
 
 /* =========================
    VOTING UI (better layout)
-   ========================= */
+   ========================== */
 
 .votingWrap{
   display:flex;
@@ -477,7 +490,7 @@ h2{
 
 .voteGameTitle{
   font-weight: 950;
-  color: var(--ink);
+  color: var(--text); /* ✅ FIX: you had var(--ink) but --ink isn't defined */
 }
 
 .voteGameMeta{
@@ -513,9 +526,7 @@ h2{
   user-select:none;
 }
 
-.voteTeamPill input{
-  transform: scale(1.05);
-}
+.voteTeamPill input{ transform: scale(1.05); }
 
 .voteTeamLogo{
   width: 34px;
@@ -524,9 +535,7 @@ h2{
   filter: drop-shadow(0 4px 7px rgba(0,0,0,0.18));
 }
 
-.voteTeamName{
-  font-weight: 950;
-}
+.voteTeamName{ font-weight: 950; }
 
 /* Actions (button stays BELOW list, never overlaps) */
 .votingActions{
@@ -536,127 +545,9 @@ h2{
   padding-top: 2px;
 }
 
-.shopLayout{
-  display:grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 12px;
-}
-@media (max-width: 900px){
-  .shopLayout{ grid-template-columns: 1fr; }
-}
-
-.shopGrid{
-  display:grid;
-  grid-template-columns: repeat(5, minmax(130px, 1fr));
-  gap: 10px;
-}
-@media (max-width: 900px){
-  .shopGrid{ grid-template-columns: repeat(3, minmax(130px, 1fr)); }
-}
-
-.shopItemCard{
-  text-align:left;
-  border-radius: 14px;
-  padding: 10px;
-  cursor:pointer;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(0,0,0,0.20);
-}
-
-.shopIcon{
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-  display:block;
-  margin-bottom: 6px;
-}
-
-.shopNameRow{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 8px;
-}
-
-.saleBadge{
-  font-weight: 950;
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(255,214,102,0.22);
-  border: 1px solid rgba(255,214,102,0.55);
-  color: rgba(255,255,255,0.96);
-}
-
-.shopItemName{ font-weight: 950; color: rgba(255,255,255,0.96); }
-.shopItemMeta{ margin-top: 4px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.80); }
-
-.shopDetails{
-  border-radius: 16px;
-  padding: 12px;
-  background: rgba(0,0,0,0.18);
-  border: 1px solid rgba(255,255,255,0.16);
-}
-.shopDetailsEmpty{
-  border-radius: 16px;
-  padding: 12px;
-  background: rgba(0,0,0,0.12);
-  border: 1px dashed rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.75);
-  font-weight: 800;
-}
-
-.shopDetailsImg{
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  display:block;
-  margin-bottom: 10px;
-}
-.shopDetailsTitle{ font-weight: 950; color: rgba(255,255,255,0.96); font-size: 16px; }
-.shopDetailsRarity{ margin-top: 4px; font-weight: 900; color: rgba(255,255,255,0.80); }
-.shopDetailsDesc{ margin-top: 10px; font-weight: 800; color: rgba(255,255,255,0.86); line-height: 1.35; }
-.shopDetailsPrice{ margin-top: 10px; font-weight: 950; color: rgba(255,255,255,0.94); }
-
-.collectionGrid{
-  display:grid;
-  grid-template-columns: repeat(6, minmax(120px, 1fr));
-  gap: 10px;
-}
-@media (max-width: 900px){
-  .collectionGrid{ grid-template-columns: repeat(3, minmax(120px, 1fr)); }
-}
-
-.invCard{
-  border-radius: 14px;
-  padding: 10px;
-  background: rgba(0,0,0,0.18);
-  border: 1px solid rgba(255,255,255,0.16);
-}
-.invIcon{
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-  display:block;
-  margin-bottom: 8px;
-}
-.invName{ font-weight: 950; color: rgba(255,255,255,0.96); }
-.invMeta{ margin-top: 4px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.80); }
-
-.recentGlow{
-  box-shadow:
-    0 0 0 2px rgba(255,214,102,0.40),
-    0 0 18px rgba(255,214,102,0.28);
-  animation: recentPulse 1.4s ease-in-out infinite;
-}
-@keyframes recentPulse{
-  0%,100%{ filter: brightness(1); }
-  50%{ filter: brightness(1.06); }
-}
-
 /* =========================
    SHOP / COLLECTION UI
-   ========================= */
+   ========================== */
 
 .bigHeaderRow{
   display:flex;
@@ -672,6 +563,7 @@ h2{
   flex-wrap:wrap;
 }
 
+/* ✅ keep only ONE definition (you had duplicates) */
 .shopLayout{
   display:grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -681,6 +573,7 @@ h2{
   .shopLayout{ grid-template-columns: 1fr; }
 }
 
+/* ✅ keep only ONE definition (you had duplicates) */
 .shopGrid{
   display:grid;
   grid-template-columns: repeat(5, minmax(120px, 1fr));
@@ -690,11 +583,19 @@ h2{
   .shopGrid{ grid-template-columns: repeat(3, minmax(120px, 1fr)); }
 }
 
+.shopItemCard{
+  text-align:left;
+  border-radius: 14px;
+  padding: 10px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.20);
+}
+
 /* =========================
    SHOP TILE TEXT OVERFLOW FIX
-   ========================== */
+   ========================= */
 
-/* Make every tile a predictable layout */
 .shopTile{
   border-radius: 14px;
   border: 2px solid rgba(255,214,102,0.35);
@@ -703,19 +604,16 @@ h2{
   cursor: pointer;
   text-align:left;
 
-  /* ✅ key: fixed layout */
   display: flex;
   flex-direction: column;
   gap: 6px;
 
-  /* keeps tiles even */
   min-height: 210px;
   overflow: hidden;
 }
 .shopTile:hover{ background: rgba(0,0,0,0.26); }
 .shopTile.active{ border-color: rgba(255,214,102,0.85); }
 
-/* Image gets its own fixed area */
 .shopIcon{
   width: 100%;
   height: 90px;
@@ -724,30 +622,25 @@ h2{
   flex: 0 0 auto;
 }
 
-/* ✅ clamp name to 2 lines and never spill */
 .shopTileName{
   margin-top: 2px;
   font-weight: 950;
   color: rgba(255,255,255,0.96);
 
-  /* hard stop overflow */
   overflow: hidden;
   text-overflow: ellipsis;
 
-  /* 2-line clamp */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 
-  /* helps long words not blow up layout */
   word-break: break-word;
   line-height: 1.15;
-  min-height: calc(1.15em * 2); /* reserve space for 2 lines */
+  min-height: calc(1.15em * 2);
 }
 
-/* ✅ meta always stays at the bottom */
 .shopTileMeta{
-  margin-top: auto; /* pushes meta to bottom */
+  margin-top: auto;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -757,41 +650,31 @@ h2{
   font-weight: 900;
   color: rgba(255,255,255,0.80);
 
-  /* ensure it never wraps weirdly */
   flex: 0 0 auto;
   white-space: nowrap;
 }
+.shopTileMeta .price{ white-space: nowrap; }
+.shopTileMeta .rarity{ white-space: nowrap; }
 
-/* Optional: keep price from shrinking too small */
-.shopTileMeta .price{
-  flex: 0 0 auto;
-}
-
-/* Optional: rarity chip doesn't wrap */
-.shopTileMeta .rarity{
-  flex: 0 0 auto;
-}
-
-
+/* Details panel */
 .shopDetail{
   border-radius: 16px;
   border: 2px solid rgba(255,214,102,0.42);
   background: rgba(0,0,0,0.18);
   padding: 12px;
+  overflow: hidden;
 }
 
-/* --- SHOP DETAILS (RIGHT PANEL) --- */
 .shopDetailTop{
   display:flex;
   gap: 14px;
-  align-items:flex-start;   /* top-align so big image doesn't squash text */
+  align-items:flex-start;
 }
 
-/* Make the selected item image BIG */
 .shopDetailIcon{
-  width: 220px;             /* ✅ bigger preview */
+  width: 220px;
   height: 220px;
-  flex: 0 0 220px;          /* keep its space */
+  flex: 0 0 220px;
   object-fit: contain;
   border-radius: 14px;
 
@@ -799,11 +682,9 @@ h2{
   border: 1px solid rgba(255,255,255,0.14);
   padding: 10px;
 
-  /* optional: make it pop */
   filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
 }
 
-/* On smaller screens, scale down so it still fits */
 @media (max-width: 900px){
   .shopDetailIcon{
     width: 140px;
@@ -812,11 +693,15 @@ h2{
   }
 }
 
-
 .shopDetailName{
   font-weight: 950;
   font-size: 18px;
   color: rgba(255,255,255,0.96);
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.15;
 }
 
 .shopDetailTags{
@@ -830,6 +715,11 @@ h2{
   margin-top: 10px;
   font-weight: 800;
   color: rgba(255,255,255,0.84);
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
 }
 
 .shopDetailPrice{
@@ -891,94 +781,8 @@ h2{
 .rarity.legendary{ border-color: rgba(255,210,90,0.70); }
 
 /* =========================
-   SHOP TEXT OVERFLOW FIXES
-   Paste at BOTTOM of style.css
-   ========================= */
-
-/* Make tiles a clean vertical layout */
-.shopTile{
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 200px;           /* keeps tiles consistent */
-  overflow: hidden;            /* never bleed outside */
-}
-
-/* Icons should never stretch layout */
-.shopIcon{
-  height: 86px;
-  width: 100%;
-  object-fit: contain;
-  flex: 0 0 auto;
-}
-
-/* Name: clamp to 2 lines with ellipsis (prevents spilling) */
-.shopTileName{
-  margin-top: 2px;
-  font-weight: 950;
-  color: rgba(255,255,255,0.96);
-
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;       /* <- 2 lines */
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  line-height: 1.15;
-  min-height: calc(1.15em * 2); /* reserves space so meta doesn't jump */
-}
-
-/* Meta row stays pinned near bottom */
-.shopTileMeta{
-  margin-top: auto;            /* pushes meta to bottom of tile */
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 8px;
-
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(255,255,255,0.80);
-}
-
-/* Price never wraps weird */
-.shopTileMeta .price{
-  white-space: nowrap;
-}
-
-/* Details panel: allow wrapping cleanly instead of clipping */
-.shopDetail{
-  overflow: hidden;
-}
-
-.shopDetailName{
-  font-weight: 950;
-  font-size: 18px;
-  color: rgba(255,255,255,0.96);
-
-  /* allow wrap (no cutting) */
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  line-height: 1.15;
-}
-
-/* Description also wraps safely */
-.shopDetailDesc{
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  line-height: 1.35;
-}
-
-/* Optional: if your rarity/stack tags ever overflow */
-.shopDetailTags{
-  flex-wrap: wrap;
-}
-
-/* =========================
    SLOTS – HORIZONTAL MACHINE
-   ========================= */
+   ========================== */
 
 .slotMachine{
   margin-top: 14px;
@@ -996,16 +800,14 @@ h2{
   box-shadow: 0 18px 34px rgba(0,0,0,0.35);
 }
 
-/* REELS SIDE BY SIDE */
 .slotCols{
-  display: flex;              /* 🔑 makes horizontal */
+  display: flex;
   gap: 14px;
   justify-content: center;
   align-items: center;
   margin-bottom: 16px;
 }
 
-/* EACH REEL */
 .slotCol{
   width: 140px;
   height: 140px;
@@ -1022,7 +824,6 @@ h2{
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* WINDOW THAT “STOPS” */
 .slotWindow{
   width: 100%;
   height: 100%;
@@ -1036,7 +837,6 @@ h2{
   overflow:hidden;
 }
 
-/* LOGO IMAGE */
 .slotIcon{
   width: 90%;
   height: 90%;
@@ -1044,14 +844,12 @@ h2{
   filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
 }
 
-/* STOPPING FLASH */
 .slotWindow.isStopping{
   box-shadow:
     0 0 0 2px rgba(255,214,102,0.8),
     0 0 22px rgba(255,214,102,0.6);
 }
 
-/* WIN FX */
 .slotMachine.isWin{
   animation: slotWinFlash 0.9s ease-in-out;
 }
@@ -1066,7 +864,6 @@ h2{
   animation: slotPulse 0.9s ease-in-out infinite;
 }
 
-/* BUTTON AREA */
 .slotActions{
   display:flex;
   flex-direction:column;
@@ -1074,7 +871,6 @@ h2{
   gap:8px;
 }
 
-/* ANIMATIONS */
 @keyframes slotPulse{
   0%,100%{ transform: scale(1); }
   50%{ transform: scale(1.08); }
@@ -1086,32 +882,29 @@ h2{
   100%{ filter: brightness(1); }
 }
 
-/* MOBILE ADJUST */
 @media (max-width: 700px){
   .slotCol{
     width: 100px;
     height: 100px;
   }
+}
+
 /* =========================================
    SLOTS – MAKE PANEL + REELS + ICONS BIGGER
-   Paste at VERY BOTTOM of style.css
    ========================================= */
 
-/* Bigger slots modal panel (ONLY slots) */
 #slotsCard{
   width: min(1500px, 98vw);
   height: min(900px, 94vh);
   padding: 26px;
 }
 
-/* Make the slot machine container itself bigger */
 #slotsCard .slotMachine{
   margin-top: 14px;
   padding: 28px;
   border-radius: 24px;
 }
 
-/* Horizontal reels row */
 #slotsCard .slotCols{
   display:flex;
   justify-content:center;
@@ -1120,7 +913,6 @@ h2{
   margin: 18px 0 26px 0;
 }
 
-/* Each reel box (BIG) */
 #slotsCard .slotCol{
   width: 300px;
   height: 300px;
@@ -1129,7 +921,6 @@ h2{
   border-width: 3px;
 }
 
-/* Window */
 #slotsCard .slotWindow{
   width: 100%;
   height: 100%;
@@ -1140,21 +931,18 @@ h2{
   overflow:hidden;
 }
 
-/* Team logo (BIG) */
 #slotsCard .slotIcon{
   width: 94%;
   height: 94%;
   object-fit: contain;
 }
 
-/* Spin button bigger */
 #slotsCard #spinSlotsBtn{
   padding: 16px 20px;
   font-size: 18px;
   border-radius: 16px;
 }
 
-/* Responsive step-down */
 @media (max-width: 1200px){
   #slotsCard{ height: min(820px, 94vh); }
   #slotsCard .slotCol{ width: 230px; height: 230px; }
@@ -1168,6 +956,4 @@ h2{
 
 @media (max-width: 420px){
   #slotsCard .slotCol{ width: 125px; height: 125px; }
-}
-
 }

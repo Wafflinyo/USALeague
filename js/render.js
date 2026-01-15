@@ -39,7 +39,6 @@ export function initTabs() {
    Helpers
 ----------------------------- */
 
-// Ensure wins/losses/RF/RA are numbers even if JSON has strings
 function num(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
@@ -50,11 +49,11 @@ function rd(t) {
 }
 
 /**
- * ✅ Sort order you requested:
+ * Sort order:
  * 1) wins DESC
- * 2) RD DESC (tiebreaker)
- * 3) losses ASC (extra safety, but after RD per your request)
- * 4) name ASC (stable final tie)
+ * 2) RD DESC
+ * 3) losses ASC
+ * 4) name ASC
  */
 function sortTeams(list) {
   return list.slice().sort((a, b) => {
@@ -71,16 +70,9 @@ function sortTeams(list) {
   });
 }
 
-/**
- * ✅ Fixes GitHub Pages base-path issues for logos.
- * If your JSON already uses "assets/..." this is fine.
- * If it accidentally uses "/assets/..." this will break on /USALeague/.
- */
 function fixLogoPath(p) {
   if (!p) return "";
-  // keep full URLs
   if (/^https?:\/\//i.test(p)) return p;
-  // remove leading slashes
   return String(p).replace(/^\/+/, "");
 }
 
@@ -121,10 +113,7 @@ function makeTable(rows) {
 export function renderStandings(data) {
   const teamsRaw = Array.isArray(data?.teams) ? data.teams : [];
 
-  // League
   const leagueSorted = sortTeams(teamsRaw);
-
-  // Conferences (IMPORTANT: you were not sorting these before)
   const solarSorted = sortTeams(teamsRaw.filter((t) => t.conference === "Solar"));
   const lunarSorted = sortTeams(teamsRaw.filter((t) => t.conference === "Lunar"));
 
@@ -145,13 +134,11 @@ export function renderLeaders(data) {
 
   const tab = window.__leadersTab ?? "hr";
 
-  // include all 6 tabs you have in HTML
+  // NOTE: keep these keys aligned with your data/leaders.json
   const map = {
     hr: ["homeruns", "HR"],
     runs: ["runs", "Runs"],
     rbi: ["rbis", "RBI"],
-    bavg: ["battingAvg", "BAVG"],
-    mvp: ["mvps", "MVP"],
     so: ["strikeouts", "SO"],
   };
 
@@ -218,7 +205,6 @@ export function initTicker(headlines, schedule) {
 
   if (!ticker || !inner || !drawer || !list || !close) return;
 
-  // fallback: auto headlines from last completed games
   const items =
     Array.isArray(headlines?.items) && headlines.items.length
       ? headlines.items
