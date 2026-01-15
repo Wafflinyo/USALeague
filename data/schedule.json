@@ -85,40 +85,40 @@
       "conference": "Solar",
       "away": "Nashville Knights",
       "home": "Narf Bullets",
-      "awayScore": null,
-      "homeScore": null
+      "awayScore": 4,
+      "homeScore": 3
     },
     {
       "date": "2026-01-14",
       "conference": "Solar",
       "away": "MK Monarchs",
       "home": "Hopedogo Retrievers",
-      "awayScore": null,
-      "homeScore": null
+      "awayScore": 4,
+      "homeScore": 3
     },
     {
       "date": "2026-01-14",
       "conference": "Lunar",
       "away": "Waffle Batters",
       "home": "BRF Bombers",
-      "awayScore": null,
-      "homeScore": null
+      "awayScore": 6,
+      "homeScore": 0
     },
     {
       "date": "2026-01-14",
       "conference": "Lunar",
       "away": "Egg Beaters",
       "home": "Lunar Eclypse",
-      "awayScore": null,
-      "homeScore": null
+      "awayScore": 8,
+      "homeScore": 9
     },
     {
       "date": "2026-01-14",
       "conference": "OOC",
       "away": "Comet Eons",
       "home": "Dreary Lane",
-      "awayScore": null,
-      "homeScore": null
+      "awayScore": 11,
+      "homeScore": 5
     },
     {
       "date": "2026-01-17",
